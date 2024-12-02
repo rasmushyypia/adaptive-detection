@@ -5,7 +5,7 @@ This repository provides a comprehensive adaptive detection system pipeline cont
 
 ## Table of Contents
 - [Installation](#installation)
-- [Step 1: Capture Calibration Image](#step-1-capture-calibration-image)
+- [Step 1: Capture Calibration Image](#step-1-capture-images)
 - [Step 2: Calibrate the Camera](#step-2-calibrate-the-camera)
 - [Step 3: Capture ROI (Region of Interest) Image](#step-3-capture-roi-region-of-interest-image)
 - [Step 4: Create LEGO Dataset](#step-4-create-lego-dataset)
