@@ -7,13 +7,9 @@ This repository provides a comprehensive adaptive detection system pipeline cont
 - [Installation](#installation)
 - [Step 1: Capture Calibration Image](#step-1-capture-images)
 - [Step 2: Calibrate the Camera](#step-2-calibrate-the-camera)
-- [Step 3: Capture ROI (Region of Interest) Image](#step-3-capture-roi-region-of-interest-image)
-- [Step 4: Create LEGO Dataset](#step-4-create-lego-dataset)
-- [Step 5: Generate Label Names](#step-5-generate-label-names)
-- [Step 6: Label the LEGO Pieces](#step-6-label-the-lego-pieces)
-- [Step 7: Create Templates](#step-7-create-templates)
-- [Step 8: Generate Synthetic Images](#step-8-generate-synthetic-images)
-- [Step 9: Train the YOLO Model](#step-9-train-the-yolo-model)
+- [Step 3: Capture ROI (Region of Interest) Image](#step-3-optimize-gripping-points)
+- [Step 4: Object Detection](#step-4-object-detection)
+
 
 ## Installation
 
@@ -37,7 +33,7 @@ pip install -r requirements.txt
    - Capture a total of 20 calibration images for accurate calibration.
    General Images:
    - Press **c** to capture a coordinate frame image. This is a separate image of the calibration grid that is later used to place the coordinate frame
-   - Press **x** to capture a test image. Take a picture of rectangular test shape of which location you know to test the accuracy of calibration
+   - Press **x** to capture a test image. Take a picture of a rectangular test shape of which location you know to test the accuracy of calibration
      
 3. Additional Information:
    - Calibration images are saved in **data/calibration_images**
@@ -63,116 +59,36 @@ pip install -r requirements.txt
    - (add image here showing the measurement of offsets)
 
 
-## Step 3: capture roi (region of interest) image
+## Step 3: optimize gripping points
+Calculate optimal positions for the four grippers based on the object's shape.
+The gripping point optimization is handled by two scripts:
+   - `gripping_point_symmetric.py`: ensures symmetrical gripping points.
+   - `gripping_point_non_symmetric.py`: Allows independent positioning of grippers.
 
-run `camera_gui.py` again:
+1. Provide object shape:
+   - the script reads objects shapes from a DXF file specified in the script. Place the DXF file in `data/dxf_shapes/`
+   - 
+2. Provide the script `gripper_radius` variable so it can account for the size of the gripper head.
 
-- **calibration data:** ensure `calibration_input_location` matches the calibration data `.npz` file created in the previous step.
-- **calibration prompt:** when prompted, choose "yes" to use the calibration file.
-- **adjust roi:**
-  - adjust the exposure if necessary to get a clear view.
-  - select the appropriate area under the backlight using the gui. example settings: `exposure: 120000; roi_size: 1550`.
-  - click the "capture roi" button to save an image of the empty background along with roi and exposure information.
-<img src="/media/roi_image.png" alt="Calibration Image" width="500">
+3. Run either script. Interact with the GUI. GUI visualizes the gripping points on the object's contour
+   - Click the optimize button to maximize the safe gripping area
+   - Click the save button to create a `gripping_data.csv` in `data` folder.
 
-## Step 4: create lego dataset
 
-**Lego part id management**:
+## Step 4: object detection
 
-`TAULegoPartIDs.xlsx` file contains the ID information for all lego parts. Ensure that each part ID is unique and consistent with this file.  
-When adding new parts, assign a new ID following the existing naming scheme and update the `TAULegoPartIDs.xlsx` file.
+1. Configure Parameters
+   - Ensure calibration data and gripping data paths are correctly set in the script
+   - select `CAMERA_INDEX` that matches with the camera you are using
 
-run `lego_dataset_creator.py` to open the graphical user interface.
-
-- click **set new ID (n)** to assign a new ID to the lego part.
-- use the **select color** dropdown to choose the color of the lego part.
-
-**capture standard orientations**:
-
-- position the lego part and click **capture image (c)** to capture images from different angles.
-- the image will be saved as `<part_id>_<color>_<orientation>.jpg` in the `data/orig_images` directory.
-
-**capture unusual orientations**:
-
-- for challenging angles, click **capture weird orientation (u)** to take images that might confuse the model with other parts.
+2. Select Operation Mode:
+   - Static image test: Set `USE_STATIC_IMAGE = True` to process a single test image.
+   - Live Detection: Set `USE_STATIC_IMAGE = False` to enable real-time detection via the camera.
   
-  <img src="/media/data_generator_image.png" alt="Calibration Image" width="500">
-
-## Step 5: generate label names
-
-run `generate_label_names.py`:
-
-- **functionality:** this script gathers names of all the original images and writes them to a text file, `image_filenames.txt`.
-- **purpose:** the generated text file can be used to add label names in label studio without needing to manually type them out.
-
-## Step 6: Label the LEGO Pieces
-
-### Install Label Studio:
-
-- **Installation Guide:** Follow the Label Studio [installation guide](https://labelstud.io/guide/install.html) to set up Label Studio on your machine.
-
-### Set Up Label Studio Project:
-
-- **Project Creation:** Create a new project in Label Studio to manage your LEGO image labeling task.
-- **Image Loading:** Configure the project to load images from the directory containing your LEGO images (`data/orig_images`).
-
-### Define Labels:
-
-- **Label Import:** Use the text file generated by `generate_label_names.py` to import label names directly into Label Studio.
-
-### Label the Images:
-
-- **Draw Bounding Boxes:** Open each image in Label Studio and draw a bounding box around each LEGO piece.
-- **Assign Labels:** Assign the correct label to each bounding box.
-
-
-## Step 7: create templates
-
-export the labeled images:
-
-- **export:** export the labeled images in YOLO format from label-studio.
-- **unzip:** place the zip file in the `data/annotated_data` folder and unzip it.
-
-run `create_templates.py`:
-
-- **template creation:** this script processes the annotated images and their corresponding labels to create template images based on the bounding boxes.
-- **output:** the templates are saved in the `data/templates` directory.
-
-## Step 8: generate synthetic images
-
-run `create_images.py`:
-
-- **background and templates:** the script reads the background image and templates.
-- **template placement:** it places multiple templates on the background image to create synthetic images.
-- **non-overlapping:** ensures that the templates do not overlap significantly and stay within the margins.
-- **augmentation:** applies random rotations and intensity changes to templates for augmentation.
-- **image generation:** generates a specified number of training and validation images.
-- **output:** saves the synthetic images and their corresponding labels in the appropriate directories.
-
-## Step 9: train the yolo model
-
-### prepare for training:
-
-- **ensure data.yaml is configured correctly:** verify that `data.yaml` contains the correct paths to your training and validation datasets.
-  
-
-### run training script:
-open `Yolo_trainer.ipynb`
-
-use the following script to train your yolo model:
-
-```python
-from ultralytics import YOLO
-import os
-
-# load the pretrained yolov8 model
-model = YOLO('yolov8n.pt')
-
-# define the dataset path
-current_path = os.getcwd()
-dataset_path = os.path.join(current_path, 'src', 'data', 'data.yaml')
-
-# train the model
-results = model.train(data=dataset_path, epochs=50, imgsz=640, batch=32)
-```
-more info on the model training settings and hyperparameters on [ultralytics website](https://docs.ultralytics.com/modes/train/#train-settings)
+Features
+1. Shape Detection
+   - Image Preprocessing: Converts images to grayscale, applies Gaussian blur to reduce noise, and utilizes Canny edge detection to highlight object boundaries.
+   - Contour Extraction: Detects contours from the edge-detected image and compares them with the reference polygon using OpenCV's `matchShapes` method. Detected contours are filtered based on similarity score and area-difference to the reference image.
+   - Centroid Calculation: Calculates image moments of each detected contour to determine the centroid coordinates, providing the object's precise location within the frame.
+   - Angle optimization: Utilizes the Differential Evolution algorithm to optimize the rotation angle and positional shifts of the reference polygon, aiming to maximize the IoU with detected contours.
+   - Uses `Logging` module to record detailed debug information of the program. Includes performance tracking of the process by taking time.
