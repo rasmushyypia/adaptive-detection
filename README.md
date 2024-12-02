@@ -37,28 +37,31 @@ pip install -r requirements.txt
    - Capture a total of 20 calibration images for accurate calibration.
    General Images:
    - Press **c** to capture a coordinate frame image. This is a separate image of the calibration grid that is later used to place the coordinate frame
-   - Press **x** to capture a test image. Take an image of rectangular test shape of which location you know to test the accuracy of calibration
+   - Press **x** to capture a test image. Take a picture of rectangular test shape of which location you know to test the accuracy of calibration
      
 3. Additional Information:
    - Calibration images are saved in **data/calibration_images**
    - General images are saved in **data**.
    - Make sure the chessboard **grid size** matches your physical calibration grid.
+
   
-
-- **calibration prompt:** when prompted about using the calibration file, answer "no."
-- **place calibration board:** position the calibration board under the camera's field of view (fov).
-- **adjust exposure:** use the gui to adjust the exposure slider until the calibration board is clearly visible.
-- **capture calibration image:** click the "capture full image" button to save an image of the calibration board for calibration.
-<img src="/media/calibration_image.png" alt="Calibration Image" width="500">
-
-
 ## Step 2: calibrate the camera
 
-run `camera_calibration.py`:
+1. run `camera_calibration.py`:
 
-- **calibration processing:** the script processes the calibration image, calculates the camera matrix and distortion coefficients, and saves this data for later use.
-- **note:** if the program outputs "no checkerboard found!", ensure the `chessboard_size` variable matches your calibration board and all corners are visible in the image.
-<img src="/media/calibrated_image.png" alt="Calibration Image" width="500">
+2. Calibration Process
+   - The script processes each calibration image, detects chessboard corners, and refines their positions.
+   - Calculates the camera matrix and distortion coefficients
+  
+3. Output:
+   - Calibration data is saved in **data/calibration_data.pkl**
+
+4. Additional Information:
+   - Ensure the **grid_size** and **square_size** match you physical calibration board.
+   - The scrips utilizes variables **offset_x** and **offset_y**. These are physical distances from the calibration grid origin to the corner of the table used for           object detection.
+   - If you have ractangular shapes placed on known positions on the table, you can use variable **visualize** to see how accurate you calibration was.
+   - (add image here showing the measurement of offsets)
+
 
 ## Step 3: capture roi (region of interest) image
 
