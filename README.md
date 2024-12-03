@@ -1,5 +1,4 @@
-# Adaptive Gripper System
-
+# Adaptive Gripping and Detection System
 This repository provides a comprehensive adaptive detection system pipeline containing camera calibration, gripping point optimization, and real-time detection. Follow the steps outlined below to set up and use the system effectively.
 
 
