@@ -6,7 +6,7 @@ This repository provides a comprehensive adaptive detection system pipeline cont
 ## Table of Contents
 - [Installation](#installation)
 - [Step 1: Capture Calibration Image](#step-1-capture-images)
-- [Step 2: Calibrate the Camera](#step-2-Calibrate-The-Camera)
+- [Step 2: Calibrate the Camera](#step-2-calibrate-the-camera)
 - [Step 3: Optimize Gripping Points](#step-3-optimize-gripping-points)
 - [Step 4: Object Detection](#step-4-object-detection)
 
@@ -51,7 +51,7 @@ are located in the `adaptive-detection/data/calibration_boards/` directory.
  - General images are stored in `data/`.
 
 
-## Step 2: Calibrate The Camera
+## Step 2: Calibrate the Camera
 This step involves computing the camera's intrinsic parameters and distortion coefficients using the previosly captured calibration image. Proper calibration allows for undistorting images and accurately mapping image points to real-world coordinates.
 
 #### 1. Configure calibration parameters: 
@@ -73,7 +73,7 @@ Open the `camera_calibration.py` script and locate the **Calibration Parameters*
    - The calibration data, including offset information is saved to `data/calibration_data.pkl` file. 
 
 
-## Step 3: optimize gripping points
+## Step 3: Optimize Gripping Points
 This step involves selecting and refining the optimal points on object's contour where the grippers will make contact.
 
 #### 1. Load and prepare contour data
@@ -99,7 +99,7 @@ This step involves selecting and refining the optimal points on object's contour
  - The gripping points and polygon coordinates are saved to a **CSV file** (`data/gripping_data.csv`)
 
 
-## Step 4: object detection
+## Step 4: Object Detection
 Object detection is the main program in this project that utilizes data generated in earlier steps to identify and localize objects within the camera's field of view. 
 
 #### 1. Load calibration and gripping data
