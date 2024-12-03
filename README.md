@@ -35,42 +35,41 @@ are located in the `adaptive-detection/data/calibration_boards/` directory.
 
 <img src="/data/calibration_boards/checkerboard_radon_medium.jpg" alt="Calibration Image" width="500">
 
-**Instructions**
-1. Verify that the checkerboard used for main camera calibration matches the grid size specified in the script (default is 10x7).
-2. run `capture_images.py`
-3. Follow on-screen instructions:
-   - Press `SPACEBAR` to capture calibration images when the checkerboard is detected.
-      - Capture a total of **20 calibration** images for accurate calibration.
-   - Align checkerboard with the table and press `c` to capture a `coordinate_frame_image.jpg`
-   - Press `x` to capture a `test_image.jpg` of a rectangular object positioned at a known location relative to the table.
-      - This is optional, but can be used in the next step to verify the accuracy of the calibration. 
-4. Additional Information:
-   - Calibration images are stored in `data/calibration_images`
-   - General images are stored in `data/`.
+#### 1. Verify that the checkerboard used for main camera calibration matches the grid size specified in the script (default is 10x7).
+
+#### 2. run `capture_images.py`
+
+#### 3. Follow on-screen instructions:
+ - Press `SPACEBAR` to capture calibration images when the checkerboard is detected.
+    - Capture a total of **20 calibration** images for accurate calibration.
+ - Align checkerboard with the table and press `c` to capture a `coordinate_frame_image.jpg`
+ - Press `x` to capture a `test_image.jpg` of a rectangular object positioned at a known location relative to the table.
+    - This is optional, but can be used in the next step to verify the accuracy of the calibration.
+
+#### 4. Additional Information:
+ - Calibration images are stored in `data/calibration_images`
+ - General images are stored in `data/`.
 
 
 ## Step 2: calibrate the camera
 This step involves computing the camera's intrinsic parameters and distortion coefficients using the previosly captured calibration image. Proper calibration allows for undistorting images and accurately mapping image points to real-world coordinates.
 
-1. **Configure calibration parameters**:
-  Open the `camera_calibration.py` script and locate the **Calibration Parameters** section within the `main()` function. Ensure the following parameters are correctly configured:
+#### 1. Configure calibration parameters: 
+Open the `camera_calibration.py` script and locate the **Calibration Parameters** section within the `main()` function. Ensure the following parameters are correctly configured:
+  - **Calibration parameters** (`calib_grid_size` and `calib_square_size`) define the number of internal corners per chessboard row and column, and size of each chessboard square in millimeters respectively.
+  - **Mapping parameters** (`mapping_grid_size` and `mapping_square_size`) are similar to calibration parameters but used for defining the coordinate frame.
+    - These might differ based on your setup.
+  - **Offsets** (`offset_x` and `offset_y`) define the physical offset in millimeters from the chessboard's origin to the tables's corner.
+    - Used to move the origin to the corner of table for ease of use.
+    - To better understand how `offset_x` and `offset_y` affect the origin. The orange dashed lines in the image below indicate the offsets move the origin from the chessboard's origin to the table's edge.
 
-    - **Calibration parameters** (`calib_grid_size` and `calib_square_size`) define the number of internal corners per chessboard row and column, and size of each chessboard square in millimeters respectively.
-    - **Mapping parameters** (`mapping_grid_size` and `mapping_square_size`) are similar to calibration parameters but used for defining the coordinate frame.
-      - These might differ based on your setup.
-    - **Offsets** (`offset_x` and `offset_y`) define the physical offset in millimeters from the chessboard's origin to the tables's corner.
-      - Used to move the origin to the corner of table for ease of use.
-      - To better understand how `offset_x` and `offset_y` affect the origin. The orange dashed lines in the image below indicate the offsets move the origin from the chessboard's origin to the table's edge.
+<img src="/media/offset_image.jpg" alt="offset_image" width="800">
 
-<img src="/media/offset_image.jpg" alt="offset_image" width="500">
-
-2. Run `camera_calibration.py`
-
+#### 2. Run `camera_calibration.py`
    - The script includes a `visualize` flag. When set to `True`, the script will display intermediate steps such as detected chessboard corners and annotated images to help verify the calibration process.
    - The script will display camera matrix, distortion coefficients, and the mean reprojection error, which can indicate the calibration accuracy.
 
-3. Additional Information:
-
+#### 3. Additional Information:
    - The calibration data, including offset information is saved to `data/calibration_data.pkl` file. 
 
 
@@ -93,25 +92,35 @@ This step involves selecting and refining the optimal points on object's contour
      - Optimizes either `safe quadrilateral area` or `max offset` from outer contour.
   - Currently program has two versions `GrippingPointSymmetric.py` and `GrippingPointNonSymmetric.py` visualized in images below.
 
-#### 4. Additional Information:
-     
-   - The gripping points and polygon coordinates are saved to a **CSV file** (`data/gripping_data.csv`)
+<img src="/media/symmetric_gui.png" alt="offset_image" width="600">
+<img src="/media/non_symmetric_gui.png" alt="offset_image" width="600">
+
+#### 4. Additional Information:     
+ - The gripping points and polygon coordinates are saved to a **CSV file** (`data/gripping_data.csv`)
 
 
 ## Step 4: object detection
+Object detection is the main program in this project that utilizes data generated in earlier steps to identify and localize objects within the camera's field of view. 
 
-1. Configure Parameters
-   - Ensure calibration data and gripping data paths are correctly set in the script
-   - select `CAMERA_INDEX` that matches with the camera you are using
+#### 1. Load calibration and gripping data
+  - The object detection utilizes `calibration_data.pkl` and `gripping_data.csv` generated in earlier scripts.
 
-2. Select Operation Mode:
-   - Static image test: Set `USE_STATIC_IMAGE = True` to process a single test image.
-   - Live Detection: Set `USE_STATIC_IMAGE = False` to enable real-time detection via the camera.
+#### 2. Configure detection parameters
+  - `THRESHOLD`: similarity threshold for contour matching
+  - `AREA_TOLERANCE`: tolerance for area difference between detected and reference contours.
+  - `USE_STATIC_IMAGE`: Set to **True** to run detection on a static image, or **False** to use live webcam feed.
+  - furthermore `optimize_angle' function contains parameters relevant to **Differential Evolution** used in optimizing the detected contour angle.
+
+#### 3. Run `detection_modularized.py`
+
+### How it works:
+  - **Image Preprocessing**: Converts images to grayscale, applies Gaussian blur to reduce noise, and utilizes Canny edge detection to highlight object boundaries.
+  - **Contour Detection and Matching**: Detects contours from the preprocessed image and compares them with the reference polygon using OpenCV's `matchShapes` method. Detected contours are filtered based on similarity score and area difference to the reference image.
+  - **Centroid Calculation**: Calculates centroid of the detected contour to provide precise location (x, y) on the table.
+  - **Angle Optimization**: Utilizes Differential Evolution algorithm to calculate rotation angle and small positional shifts by maximizing the Intersection over Union (IoU) between reference and detected contours.
+  - **Data to Robot**: The calculated coordinates (x, y) and rotation angle (R) are provided to the robot to move it to the gripping position.
+  - **Gripper Positioning**: The gripper jig, mounted on the 6-axis robot, utilizes the gripping points calculated in GrippingPointSymmetric.py. Servos within the jig adjust each individual gripper's position based on these coordinates.
+
+#### 4. Additional information
+  - The script calculates time that it took to optimize, which can be used to find good parameter values.
   
-Features
-1. Shape Detection
-   - Image Preprocessing: Converts images to grayscale, applies Gaussian blur to reduce noise, and utilizes Canny edge detection to highlight object boundaries.
-   - Contour Extraction: Detects contours from the edge-detected image and compares them with the reference polygon using OpenCV's `matchShapes` method. Detected contours are filtered based on similarity score and area-difference to the reference image.
-   - Centroid Calculation: Calculates image moments of each detected contour to determine the centroid coordinates, providing the object's precise location within the frame.
-   - Angle optimization: Utilizes the Differential Evolution algorithm to optimize the rotation angle and positional shifts of the reference polygon, aiming to maximize the IoU with detected contours.
-   - Uses `Logging` module to record detailed debug information of the program. Includes performance tracking of the process by taking time.
