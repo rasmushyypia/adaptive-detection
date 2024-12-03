@@ -27,7 +27,7 @@ pip install -r requirements.txt
 ## Step 1: capture images
 This step involves capturing calibration and general images using round-cornered Radon checkerboards to ensure accurate camera calibration and coordinate frame definition.
 This project utilized two different sized checkerboards, each serving a specific purpose in the calibration process. Both the **SVG** and **JPG** files for these checkerboards
-are located in the `adaptive-detection/data/calibration_boards/` directory
+are located in the `adaptive-detection/data/calibration_boards/` directory.
 
    **Medium Checkerboard** (`checkerboard_radon_medium.jpg`) is utilized for capturing the **20 calibration images** required for accurate camera calibration.
    
@@ -49,23 +49,28 @@ are located in the `adaptive-detection/data/calibration_boards/` directory
    - General images are stored in `data/`.
 
 
-  
 ## Step 2: calibrate the camera
+This step involves computing the camera's intrinsic parameters and distortion coefficients using the previosly captured calibration image. Proper calibration allows for undistorting images and accurately mapping image points to real-world coordinates.
 
-1. run `camera_calibration.py`:
+1. **Configure calibration parameters**:
+  Open the `camera_calibration.py` script and locate the **Calibration Parameters** section within the `main()` function. Ensure the following parameters are correctly configured:
 
-2. Calibration Process
-   - The script processes each calibration image, detects chessboard corners, and refines their positions.
-   - Calculates the camera matrix and distortion coefficients
-  
-3. Output:
-   - Calibration data is saved in **data/calibration_data.pkl**
+    - **Calibration parameters** (`calib_grid_size` and `calib_square_size`) define the number of internal corners per chessboard row and column, and size of each chessboard square in millimeters respectively.
+    - **Mapping parameters** (`mapping_grid_size` and `mapping_square_size`) are similar to calibration parameters but used for defining the coordinate frame.
+      - These might differ based on your setup.
+    - **Offsets** (`offset_x` and `offset_y`) define the physical offset in millimeters from the chessboard's origin to the tables's corner.
+      - Used to move the origin to the corner of table for ease of use.
+      - To better understand how `offset_x` and `offset_y` affect the origin. The orange dashed lines represent the offsets from the checkerboards origin
 
-4. Additional Information:
-   - Ensure the **grid_size** and **square_size** match you physical calibration board.
-   - The scrips utilizes variables **offset_x** and **offset_y**. These are physical distances from the calibration grid origin to the corner of the table used for           object detection.
-   - If you have ractangular shapes placed on known positions on the table, you can use variable **visualize** to see how accurate you calibration was.
-   - (add image here showing the measurement of offsets)
+2. Run `camera_calibration.py`
+
+   - The script includes a `visualize` flag. When set to `True`, the script will display intermediate steps such as detected chessboard corners and annotated images to help verify the calibration process.
+   - The script will display camera matrix, distortion coefficients, and the mean reprojection error, which can indicate the calibration accuracy
+
+3. Additional Information:
+
+   - The calibration data, including offset information is saved to `data/calibration_data.pkl` file. 
+
 
 
 ## Step 3: optimize gripping points
