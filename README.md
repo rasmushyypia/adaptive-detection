@@ -13,13 +13,14 @@ This repository provides a comprehensive adaptive detection system pipeline cont
 
 ## Installation
 
-To get started, clone this repository and install the required dependencies.
+To get started, clone this repository and install the required dependencies:
 
-```bash
+```
+bash
 git clone https://github.com/rasmushyypia/adaptive-detection.git
 cd adaptive-detection
-(ensure this is right)
-conda create --name adaptive-detection
+conda create --name adaptive-detection python=3.8
+conda activate adaptive-detection
 pip install -r requirements.txt
 ```
 
