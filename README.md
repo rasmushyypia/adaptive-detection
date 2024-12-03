@@ -60,33 +60,42 @@ This step involves computing the camera's intrinsic parameters and distortion co
       - These might differ based on your setup.
     - **Offsets** (`offset_x` and `offset_y`) define the physical offset in millimeters from the chessboard's origin to the tables's corner.
       - Used to move the origin to the corner of table for ease of use.
-      - To better understand how `offset_x` and `offset_y` affect the origin. The orange dashed lines represent the offsets from the checkerboards origin
+      - To better understand how `offset_x` and `offset_y` affect the origin. The orange dashed lines in the image below indicate the offsets move the origin from the chessboard's origin to the table's edge.
+
+<img src="/media/offset_image.jpg" alt="offset_image" width="500">
 
 2. Run `camera_calibration.py`
 
    - The script includes a `visualize` flag. When set to `True`, the script will display intermediate steps such as detected chessboard corners and annotated images to help verify the calibration process.
-   - The script will display camera matrix, distortion coefficients, and the mean reprojection error, which can indicate the calibration accuracy
+   - The script will display camera matrix, distortion coefficients, and the mean reprojection error, which can indicate the calibration accuracy.
 
 3. Additional Information:
 
    - The calibration data, including offset information is saved to `data/calibration_data.pkl` file. 
 
 
-
 ## Step 3: optimize gripping points
-Calculate optimal positions for the four grippers based on the object's shape.
-The gripping point optimization is handled by two scripts:
-   - `gripping_point_symmetric.py`: ensures symmetrical gripping points.
-   - `gripping_point_non_symmetric.py`: Allows independent positioning of grippers.
+This step involves selecting and refining the optimal points on object's contour where the grippers will make contact.
 
-1. Provide object shape:
-   - the script reads objects shapes from a DXF file specified in the script. Place the DXF file in `data/dxf_shapes/`
-   - 
-2. Provide the script `gripper_radius` variable so it can account for the size of the gripper head.
+#### 1. Load and prepare contour data
+  - The process begins by loading the contour data of the object to be gripped. This can be done either by:
+    - Importing the object's outline from a **DXF file**.
+    - Selecting from a set of **predefined shapes** for testing purposes.
+     
+#### 2. Calculate centroid and internal angles
+  - Calculate the geometric center of the contour and center the shape around origin.
+  - Computes the internal angles at each vertex of the contour to identify significant points for selecting initial gripping points.
+  
+#### 3. GUI for adjusting and optimizing the gripping points.
+  - Displays the object's contour, initial gripping points, and safe quadrilateral areas.
+  - Includes sliders and buttons to select step size and move gripping points clockwise or counterclockwise along the contour.
+  - Utilizes **Sequential Least Squares Programming** for optimization.
+     - Optimizes either `safe quadrilateral area` or `max offset` from outer contour.
+  - Currently program has two versions `GrippingPointSymmetric.py` and `GrippingPointNonSymmetric.py` visualized in images below.
 
-3. Run either script. Interact with the GUI. GUI visualizes the gripping points on the object's contour
-   - Click the optimize button to maximize the safe gripping area
-   - Click the save button to create a `gripping_data.csv` in `data` folder.
+#### 4. Additional Information:
+     
+   - The gripping points and polygon coordinates are saved to a **CSV file** (`data/gripping_data.csv`)
 
 
 ## Step 4: object detection
