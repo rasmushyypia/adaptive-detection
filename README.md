@@ -123,4 +123,5 @@ Object detection is the main program in this project that utilizes data generate
 
 #### 4. Additional information
   - The script calculates time that it took to optimize, which can be used to find good parameter values.
-  
+
+<img src="/media/object_detection_result.png" alt="detection_result" width="1000">
