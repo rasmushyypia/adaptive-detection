@@ -24,7 +24,7 @@ conda activate adaptive-detection
 pip install -r requirements.txt
 ```
 
-## Step 1: capture images
+## Step 1: Capture Images
 This step involves capturing calibration and general images using round-cornered Radon checkerboards to ensure accurate camera calibration and coordinate frame definition.
 This project utilized two different sized checkerboards, each serving a specific purpose in the calibration process. Both the **SVG** and **JPG** files for these checkerboards
 are located in the `adaptive-detection/data/calibration_boards/` directory.
