@@ -25,21 +25,29 @@ pip install -r requirements.txt
 ```
 
 ## Step 1: capture images
+This step involves capturing calibration and general images using round-cornered Radon checkerboards to ensure accurate camera calibration and coordinate frame definition.
+This project utilized two different sized checkerboards, each serving a specific purpose in the calibration process. Both the **SVG** and **JPG** files for these checkerboards
+are located in the `adaptive-detection/data/calibration_boards/` directory
 
-1. run `capture_images.py`:
+   **Medium Checkerboard** (`checkerboard_radon_medium.jpg`) is utilized for capturing the **20 calibration images** required for accurate camera calibration.
+   
+   **Large Checkerboard** (`checkerboard_radon_large.jpg`) is utilized for capturing the **coordinate_frame_image.jpg**, used in defining the coordinate frame on the table.
 
-2. Follow on-screen instructions
-   Calibration Images:
-   - Press **SPACEBAR** to capture a calibration image when the chessboard is detected.
-   - Capture a total of 20 calibration images for accurate calibration.
-   General Images:
-   - Press **c** to capture a coordinate frame image. This is a separate image of the calibration grid that is later used to place the coordinate frame
-   - Press **x** to capture a test image. Take a picture of a rectangular test shape of which location you know to test the accuracy of calibration
-     
-3. Additional Information:
-   - Calibration images are saved in **data/calibration_images**
-   - General images are saved in **data**.
-   - Make sure the chessboard **grid size** matches your physical calibration grid.
+<img src="/data/calibration_boards/checkerboard_radon_medium.jpg" alt="Calibration Image" width="500">
+
+**Instructions**
+1. Verify that the checkerboard used for main camera calibration matches the grid size specified in the script (default is 10x7).
+2. run `capture_images.py`
+3. Follow on-screen instructions:
+   - Press `SPACEBAR` to capture calibration images when the checkerboard is detected.
+      - Capture a total of **20 calibration** images for accurate calibration.
+   - Align checkerboard with the table and press `c` to capture a `coordinate_frame_image.jpg`
+   - Press `x` to capture a `test_image.jpg` of a rectangular object positioned at a known location relative to the table.
+      - This is optional, but can be used in the next step to verify the accuracy of the calibration. 
+4. Additional Information:
+   - Calibration images are stored in `data/calibration_images`
+   - General images are stored in `data/`.
+
 
   
 ## Step 2: calibrate the camera
