@@ -1,5 +1,3 @@
-#
-
 import os
 import logging
 import cv2
@@ -13,14 +11,14 @@ import time
 # FILE PATHS
 CALIBRATION_FILE_PATH = 'data/calibration_data.pkl'
 GRIPPER_DATA_PATH = 'data/gripping_data.csv'
-TEST_IMAGE_PATH = 'data/test_arc4.jpg'
+TEST_IMAGE_PATH = 'data/image_original3.jpg'
 
 # Configuration constants
 THRESHOLD = 0.1                
 AREA_TOLERANCE = 0.1
 LOGGING_LEVEL = logging.DEBUG   # Change to logging.INFO for less verbose output
 
-USE_STATIC_IMAGE = False 
+USE_STATIC_IMAGE = False
 CAMERA_INDEX = 1
 DESIRED_WIDTH = 1920
 DESIRED_HEIGHT = 1080
@@ -125,6 +123,7 @@ def detect_matching_shapes(frame, polygon_contour, method=cv2.CONTOURS_MATCH_I1,
 
     return matched_contours
 
+
 def negative_iou(params, polygon_coords_world, x_world, y_world, homography_inv, offset_x, offset_y, frame_shape, cnt):
     angle_deg, x_shift, y_shift = params
     rotated_polygon = rotate_points(polygon_coords_world, angle_deg)
@@ -139,7 +138,7 @@ def negative_iou(params, polygon_coords_world, x_world, y_world, homography_inv,
     return -iou  # Negative because we are minimizing
 
 
-def optimize_angle_differential_evolution(
+def optimize_angle(
     cnt, x_world, y_world, polygon_coords_world, homography_inv, offset_x, offset_y, frame_shape
 ):
     """
@@ -170,7 +169,7 @@ def optimize_angle_differential_evolution(
             bounds,
             strategy='best1bin',
             maxiter=1000,          # Reduced number of generations
-            popsize=5,          # Reduced population size
+            popsize=9,          # Reduced population size
             tol=0.01,            # Increased tolerance for faster convergence
             mutation=(0.5, 1),
             recombination=0.7,
@@ -257,7 +256,7 @@ def visualize_detections(
             0.6, (0, 0, 255), 2)
 
         # Optimize the angle using IoU
-        optimized_angle, x_shift, y_shift, max_iou = optimize_angle_differential_evolution(
+        optimized_angle, x_shift, y_shift, max_iou = optimize_angle(
             cnt, x_world, y_world, polygon_coords_world,
             homography_inv, offset_x, offset_y, frame.shape)
 
