@@ -6,8 +6,8 @@ This repository provides a comprehensive adaptive detection system pipeline cont
 ## Table of Contents
 - [Installation](#installation)
 - [Step 1: Capture Calibration Image](#step-1-capture-images)
-- [Step 2: Calibrate the Camera](#step-2-calibrate-the-camera)
-- [Step 3: Capture ROI (Region of Interest) Image](#step-3-optimize-gripping-points)
+- [Step 2: Calibrate the Camera](#step-2-Calibrate-The-Camera)
+- [Step 3: Optimize Gripping Points](#step-3-optimize-gripping-points)
 - [Step 4: Object Detection](#step-4-object-detection)
 
 
@@ -51,7 +51,7 @@ are located in the `adaptive-detection/data/calibration_boards/` directory.
  - General images are stored in `data/`.
 
 
-## Step 2: calibrate the camera
+## Step 2: Calibrate The Camera
 This step involves computing the camera's intrinsic parameters and distortion coefficients using the previosly captured calibration image. Proper calibration allows for undistorting images and accurately mapping image points to real-world coordinates.
 
 #### 1. Configure calibration parameters: 
