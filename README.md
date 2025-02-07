@@ -66,7 +66,7 @@ Open the `camera_calibration.py` script and locate the **Calibration Parameters*
 
 #### 2. Run `camera_calibration.py`
    - The script includes a `visualize` flag. When set to `True`, the script will display intermediate steps such as detected chessboard corners and annotated images to help verify the calibration process.
-   - The script will display camera matrix, distortion coefficients, and the mean reprojection error, which can indicate the calibration accuracy.
+   - The script will display camera matrix, distortion coefficients, and the mean reprojection error, which indicates about the calibration accuracy.
 
 #### 3. Additional Information:
    - The calibration data, including offset information is saved to `data/calibration_data.pkl` file. 
