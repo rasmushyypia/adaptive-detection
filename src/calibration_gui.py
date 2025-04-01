@@ -16,7 +16,7 @@ from utils.camera_utils import (
 class CalibrationGUI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Camera Calibration GUI with Homography")
+        self.title("Camera Calibration GUI")
         self.geometry("1240x600")
         self.resizable(False, False)
 
@@ -385,7 +385,7 @@ class CalibrationGUI(tk.Tk):
     # ------------------------------------------------------------
     def run_single_image_calibration(self):
         """
-        Single-image calibration + compute homography (using the same coordinate frame image).
+        Single-image calibration.
         """
         default_coord_path = os.path.join(self.calibration_dir, "coord_frame_00.jpg")
         if not os.path.exists(default_coord_path):
@@ -451,7 +451,7 @@ class CalibrationGUI(tk.Tk):
             os.makedirs('data', exist_ok=True)
             with open('data/calibration_data_single.pkl', 'wb') as f:
                 pickle.dump(cal_data, f)
-            print("Single-image calibration + homography saved to data/calibration_data_single.pkl.")
+            print("Single-image calibration saved to data/calibration_data_single.pkl.")
 
         # If user wants to visualize, show undistorted w/ grid overlay
         if visualize:
@@ -478,7 +478,7 @@ class CalibrationGUI(tk.Tk):
 
     def run_multi_image_calibration(self):
         """
-        Multi-image calibration + compute homography (using coordinate frame image).
+        Multi-image calibration (using coordinate frame image).
         """
         grid_size = (self.calib_grid_cols_var.get(), self.calib_grid_rows_var.get())
         square_size = self.calib_square_size_var.get()
@@ -537,7 +537,7 @@ class CalibrationGUI(tk.Tk):
             os.makedirs('data', exist_ok=True)
             with open('data/calibration_data_multi.pkl', 'wb') as f:
                 pickle.dump(cal_data, f)
-            print("Multi-image calibration + homography saved to data/calibration_data_multi.pkl.")
+            print("Multi-image calibration saved to data/calibration_data_multi.pkl.")
 
         # Visualization
         messagebox.showinfo(
