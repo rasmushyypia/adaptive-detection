@@ -420,6 +420,7 @@ class CalibrationGUI(tk.Tk):
                 pickle.dump(cal_data, f)
 
         messagebox.showinfo("Calibration Complete", "Single-image calibration complete.")
+        print(f"Calibration saved as data/calibration_data_single.pkl")
 
         if visualize:
             self.feed_running = False
@@ -479,6 +480,7 @@ class CalibrationGUI(tk.Tk):
 
         messagebox.showinfo("Calibration Complete",
                             "Multi-image calibration completed successfully.\nCheck console for details.")
+        print(f"Calibration saved as data/calibration_data_multi.pkl")
 
         if visualize:
             self.feed_running = False
