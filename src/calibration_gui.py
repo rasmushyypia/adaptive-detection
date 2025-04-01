@@ -10,12 +10,13 @@ from utils.camera_utils import (
     calibrate_camera_single_image,
     calibrate_camera,
     get_calibrated_image,
+    generate_object_points,  # Make sure generate_object_points is accessible
 )
 
 class CalibrationGUI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Camera Calibration GUI")
+        self.title("Camera Calibration GUI with Homography")
         self.geometry("1240x600")
         self.resizable(False, False)
 
@@ -69,10 +70,8 @@ class CalibrationGUI(tk.Tk):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
-
-        # Define a custom style for LabelFrames
         style = ttk.Style(self)
-        style.configure("BoldLabelframe.TLabelframe.Label",font=("Helvetica", 10, "bold"))
+        style.configure("BoldLabelframe.TLabelframe.Label", font=("Helvetica", 10, "bold"))
 
         # ==========================
         # Left Panel
@@ -83,17 +82,19 @@ class CalibrationGUI(tk.Tk):
         # ------------------------------------------------------------
         # 1) Capture Image Parameters
         # ------------------------------------------------------------
-        cam_frame = ttk.LabelFrame(left_panel,text="Capture Image Parameters",style="BoldLabelframe.TLabelframe")
+        cam_frame = ttk.LabelFrame(
+            left_panel, text="Capture Image Parameters", style="BoldLabelframe.TLabelframe"
+        )
         cam_frame.pack(fill="x", pady=(0, 6))
 
-        # -- Row for Camera Index --
+        # -- Camera Index --
         row_cam_idx = ttk.Frame(cam_frame)
         row_cam_idx.pack(anchor="w", pady=3)
         ttk.Label(row_cam_idx, text="Camera Index:").pack(side="left", padx=2)
         self.camera_index_var = tk.IntVar(value=self.camera_index)
         ttk.Entry(row_cam_idx, textvariable=self.camera_index_var, width=3).pack(side="left", padx=2)
 
-        # -- Row for Capture Resolution --
+        # -- Capture Resolution --
         row_res = ttk.Frame(cam_frame)
         row_res.pack(anchor="w", pady=3)
         ttk.Label(row_res, text="Capture Resolution:").pack(side="left", padx=2)
@@ -103,7 +104,7 @@ class CalibrationGUI(tk.Tk):
         self.height_var = tk.IntVar(value=self.desired_height)
         ttk.Entry(row_res, textvariable=self.height_var, width=5).pack(side="left", padx=2)
 
-        # -- Row for Chessboard Grid (preview detection) --
+        # -- Chessboard Grid (Preview) --
         row_chess = ttk.Frame(cam_frame)
         row_chess.pack(anchor="w", pady=3)
         ttk.Label(row_chess, text="Chessboard Grid:").pack(side="left", padx=2)
@@ -113,7 +114,7 @@ class CalibrationGUI(tk.Tk):
         self.chessboard_rows_var = tk.IntVar(value=self.grid_rows)
         ttk.Entry(row_chess, textvariable=self.chessboard_rows_var, width=3).pack(side="left", padx=2)
 
-        # -- Row for Start Camera Button --
+        # -- Start Camera Button --
         row_cam_btn = ttk.Frame(cam_frame)
         row_cam_btn.pack(anchor="w", padx=3, pady=5)
         self.init_cam_btn = ttk.Button(row_cam_btn, text="Start Camera", command=self.start_camera)
@@ -122,10 +123,12 @@ class CalibrationGUI(tk.Tk):
         # ------------------------------------------------------------
         # 2) Calibration & Mapping Parameters
         # ------------------------------------------------------------
-        calib_frame = ttk.LabelFrame(left_panel,text="Calibration & Mapping Parameters",style="BoldLabelframe.TLabelframe")
+        calib_frame = ttk.LabelFrame(
+            left_panel, text="Calibration & Mapping Parameters", style="BoldLabelframe.TLabelframe"
+        )
         calib_frame.pack(fill="x", pady=(0, 6))
 
-        # -- Row for Calibration Grid --
+        # -- Calibration Grid --
         row_calib_grid = ttk.Frame(calib_frame)
         row_calib_grid.pack(anchor="w", pady=3)
         ttk.Label(row_calib_grid, text="Calibration Grid:").pack(side="left", padx=2)
@@ -135,14 +138,14 @@ class CalibrationGUI(tk.Tk):
         self.calib_grid_rows_var = tk.IntVar(value=self.default_calib_grid[1])
         ttk.Entry(row_calib_grid, textvariable=self.calib_grid_rows_var, width=3).pack(side="left", padx=2)
 
-        # -- Row for Calibration Square Size --
+        # -- Calibration Square Size --
         row_calib_sq = ttk.Frame(calib_frame)
         row_calib_sq.pack(anchor="w", pady=3)
         ttk.Label(row_calib_sq, text="Calib Square Size (mm):").pack(side="left", padx=2)
         self.calib_square_size_var = tk.DoubleVar(value=self.default_calib_square)
         ttk.Entry(row_calib_sq, textvariable=self.calib_square_size_var, width=5).pack(side="left", padx=2)
 
-        # -- Row for Mapping Grid --
+        # -- Mapping Grid --
         row_map_grid = ttk.Frame(calib_frame)
         row_map_grid.pack(anchor="w", pady=3)
         ttk.Label(row_map_grid, text="Mapping Grid:").pack(side="left", padx=2)
@@ -152,14 +155,14 @@ class CalibrationGUI(tk.Tk):
         self.mapping_grid_rows_var = tk.IntVar(value=self.default_mapping_grid[1])
         ttk.Entry(row_map_grid, textvariable=self.mapping_grid_rows_var, width=3).pack(side="left", padx=2)
 
-        # -- Row for Mapping Square Size --
+        # -- Mapping Square Size --
         row_map_sq = ttk.Frame(calib_frame)
         row_map_sq.pack(anchor="w", pady=3)
         ttk.Label(row_map_sq, text="Mapping Square Size (mm):").pack(side="left", padx=2)
         self.mapping_square_size_var = tk.DoubleVar(value=self.default_mapping_square)
         ttk.Entry(row_map_sq, textvariable=self.mapping_square_size_var, width=5).pack(side="left", padx=2)
 
-        # -- Row for Checkboxes --
+        # -- Checkboxes --
         row_checks = ttk.Frame(calib_frame)
         row_checks.pack(anchor="w", padx=3, pady=6)
         self.flip_mapping_var = tk.BooleanVar(value=False)
@@ -169,22 +172,27 @@ class CalibrationGUI(tk.Tk):
         self.visualize_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(row_checks, text="Visualize Calibration", variable=self.visualize_var).pack(anchor="w")
 
-        # -- Row for Single-Image Calibration Button --
+        # -- Buttons for Single & Multi Calibration --
         row_btn_single = ttk.Frame(calib_frame)
         row_btn_single.pack(anchor="w", padx=3, pady=0)
-        self.single_calib_btn = ttk.Button(row_btn_single,text="Single-Image Calibration",command=self.run_single_image_calibration)
+        self.single_calib_btn = ttk.Button(
+            row_btn_single, text="Single-Image Calibration", command=self.run_single_image_calibration
+        )
         self.single_calib_btn.pack()
 
-        # -- Row for Multi-Image Calibration Button --
         row_btn_multi = ttk.Frame(calib_frame)
         row_btn_multi.pack(anchor="w", padx=3, pady=3)
-        self.multi_calib_btn = ttk.Button(row_btn_multi,text="Multi-Image Calibration ",command=self.run_multi_image_calibration)
+        self.multi_calib_btn = ttk.Button(
+            row_btn_multi, text="Multi-Image Calibration ", command=self.run_multi_image_calibration
+        )
         self.multi_calib_btn.pack()
 
         # ------------------------------------------------------------
         # 3) Folder Visualization
         # ------------------------------------------------------------
-        folder_frame = ttk.LabelFrame(left_panel,text="Calibration Image Folder",style="BoldLabelframe.TLabelframe")
+        folder_frame = ttk.LabelFrame(
+            left_panel, text="Calibration Image Folder", style="BoldLabelframe.TLabelframe"
+        )
         folder_frame.pack(fill="x", pady=(0, 0))
 
         list_frame = ttk.Frame(folder_frame)
@@ -212,10 +220,12 @@ class CalibrationGUI(tk.Tk):
         # ==========================
         # Right Panel: Live Feed
         # ==========================
-        right_panel = ttk.LabelFrame(self,text="Live Camera Feed & Capture",style="BoldLabelframe.TLabelframe")
+        right_panel = ttk.LabelFrame(
+            self, text="Live Camera Feed & Capture", style="BoldLabelframe.TLabelframe"
+        )
         right_panel.grid(row=0, column=1, sticky="nsew", padx=10, pady=(10, 10))
 
-        # Placeholder image
+        # Placeholder
         placeholder = PILImage.new("RGB", (self.display_width, self.display_height), color=(128, 128, 128))
         self.placeholder_imgtk = ImageTk.PhotoImage(placeholder)
         self.video_label = ttk.Label(right_panel, image=self.placeholder_imgtk)
@@ -223,11 +233,17 @@ class CalibrationGUI(tk.Tk):
 
         cap_button_frame = ttk.Frame(right_panel)
         cap_button_frame.pack(pady=5)
-        self.calib_img_btn = ttk.Button(cap_button_frame,text="Capture Calibration Image (X)",command=self.capture_calibration_image)
+        self.calib_img_btn = ttk.Button(
+            cap_button_frame, text="Capture Calibration Image (X)", command=self.capture_calibration_image
+        )
         self.calib_img_btn.pack(side="left", padx=5)
-        self.coord_img_btn = ttk.Button(cap_button_frame,text="Capture Coordinate Frame (C)",command=self.capture_coordinate_image)
+        self.coord_img_btn = ttk.Button(
+            cap_button_frame, text="Capture Coordinate Frame (C)", command=self.capture_coordinate_image
+        )
         self.coord_img_btn.pack(side="left", padx=5)
-        self.test_img_btn = ttk.Button(cap_button_frame,text="Capture Test Image (T)",command=self.capture_test_image)
+        self.test_img_btn = ttk.Button(
+            cap_button_frame, text="Capture Test Image (T)", command=self.capture_test_image
+        )
         self.test_img_btn.pack(side="left", padx=5)
 
         # Initial listing of images
@@ -237,15 +253,12 @@ class CalibrationGUI(tk.Tk):
     # Hotkey Handlers
     # ------------------------------------------------------------
     def _on_key_capture_calib(self, event):
-        """Called when user presses 'X' or 'x'."""
         self.capture_calibration_image()
 
     def _on_key_capture_coord(self, event):
-        """Called when user presses 'C' or 'c'."""
         self.capture_coordinate_image()
-    
+
     def _on_key_capture_test(self, event):
-        """Called when user presses 'T' or 't'."""
         self.capture_test_image()
 
     # ------------------------------------------------------------
@@ -278,10 +291,9 @@ class CalibrationGUI(tk.Tk):
         self.video_label.config(text="Camera feed started.")
 
     def update_feed(self):
-        """Continuously update the live video feed, respecting the aspect ratio for display."""
+        """Continuously update the live video feed."""
         if self.feed_running and self.cap is not None and self.cap.isOpened():
             grid_size = (self.current_grid_cols, self.current_grid_rows)
-            # Use the shared function to get a frame with drawn corners
             frame, grid_found = get_frame_with_grid(self.cap, grid_size)
             if frame is not None:
                 display_frame = self._aspect_ratio_resize(frame, self.display_width, self.display_height)
@@ -290,14 +302,11 @@ class CalibrationGUI(tk.Tk):
                 imgtk = ImageTk.PhotoImage(image=pil_img)
                 self.video_label.imgtk = imgtk
                 self.video_label.configure(image=imgtk)
-
-                # Track if a valid chessboard was found
                 self.current_grid_found = grid_found
 
         self.after(30, self.update_feed)
 
     def _aspect_ratio_resize(self, frame, max_width, max_height):
-        """Resize a frame to fit within (max_width x max_height), preserving aspect ratio."""
         h, w = frame.shape[:2]
         scale = min(max_width / w, max_height / h)
         new_w = int(w * scale)
@@ -308,26 +317,23 @@ class CalibrationGUI(tk.Tk):
     # Capture
     # ------------------------------------------------------------
     def capture_calibration_image(self):
-        """
-        Capture and save a calibration image only if the chessboard is detected.
-        It verifies grid detection and then captures a clean frame (without the overlaid grid) for saving.
-        """
         if not self.feed_running or self.cap is None:
             messagebox.showwarning("Warning", "Camera not started.")
             return
 
         grid_size = (self.current_grid_cols, self.current_grid_rows)
-        # Get the frame with the grid overlay to confirm detection
         frame_with_grid, found = get_frame_with_grid(self.cap, grid_size)
         if frame_with_grid is None:
             messagebox.showwarning("Warning", "Failed to grab frame from the camera.")
             return
-
         if not found:
-            messagebox.showwarning("Warning", "No chessboard detected in this frame. Adjust the board and try again.")
+            messagebox.showwarning(
+                "Warning",
+                "No chessboard detected in this frame. Adjust the board and try again."
+            )
             return
 
-        # Capture a clean frame (without the grid overlay) for saving
+        # Capture a clean frame for saving
         ret, clean_frame = self.cap.read()
         if not ret:
             messagebox.showwarning("Warning", "Failed to grab a clean frame from the camera.")
@@ -340,7 +346,6 @@ class CalibrationGUI(tk.Tk):
         print("Image Captured", f"Saved {save_path}.")
         self.refresh_image_list()
 
-
     def capture_coordinate_image(self):
         if not self.feed_running or self.cap is None:
             messagebox.showwarning("Warning", "Camera not started.")
@@ -351,7 +356,6 @@ class CalibrationGUI(tk.Tk):
             messagebox.showwarning("Warning", "Failed to grab frame from the camera.")
             return
 
-        # Generate a unique filename using the new naming pattern.
         existing_files = glob.glob(os.path.join(self.calibration_dir, "coord_frame_*.jpg"))
         next_index = len(existing_files)
         save_path = os.path.join(self.calibration_dir, f"coord_frame_{next_index:02d}.jpg")
@@ -359,12 +363,7 @@ class CalibrationGUI(tk.Tk):
         print("Coordinate Frame Captured", f"Saved {save_path}.")
         self.refresh_image_list()
 
-
     def capture_test_image(self):
-        """
-        Capture and save a test image to the test images folder.
-        Creates a new file (e.g., test_image_00.jpg) without overwriting existing images.
-        """
         if not self.feed_running or self.cap is None:
             messagebox.showwarning("Warning", "Camera not started.")
             return
@@ -374,7 +373,6 @@ class CalibrationGUI(tk.Tk):
             messagebox.showwarning("Warning", "Failed to grab frame from the camera.")
             return
 
-        # Ensure test images directory exists
         os.makedirs(self.test_images_dir, exist_ok=True)
         existing_files = glob.glob(os.path.join(self.test_images_dir, "test_image_*.jpg"))
         next_index = len(existing_files)
@@ -387,8 +385,7 @@ class CalibrationGUI(tk.Tk):
     # ------------------------------------------------------------
     def run_single_image_calibration(self):
         """
-        Run single-image calibration using the coordinate frame image,
-        then display the result by stopping the live camera feed.
+        Single-image calibration + compute homography (using the same coordinate frame image).
         """
         default_coord_path = os.path.join(self.calibration_dir, "coord_frame_00.jpg")
         if not os.path.exists(default_coord_path):
@@ -400,31 +397,65 @@ class CalibrationGUI(tk.Tk):
         flip = self.flip_mapping_var.get()
         visualize = self.visualize_var.get()
 
+        # Intrinsic calibration from single image
         cam_mtx, dist_coeffs, new_cam_mtx = calibrate_camera_single_image(
             self.coord_frame_path, grid_size, square_size, flip_origin=flip, visualize=False
         )
         if cam_mtx is None:
-            messagebox.showerror("Calibration Failed",
-                                "Chessboard corners not detected or calibration failed. Check logs/console.")
+            messagebox.showerror(
+                "Calibration Failed",
+                "Chessboard corners not detected or calibration failed. Check console."
+            )
             return
 
+        # --- Optionally compute homography with the "mapping" grid ---
+        H = None
         if self.save_calib_var.get():
+            # 1. Load & undistort the coordinate frame
+            coord_img = cv2.imread(self.coord_frame_path)
+            if coord_img is not None:
+                undistorted_img = cv2.undistort(coord_img, cam_mtx, dist_coeffs, None, new_cam_mtx)
+
+                # 2. Detect corners with the *mapping* grid
+                map_grid = (self.mapping_grid_cols_var.get(), self.mapping_grid_rows_var.get())
+                gray = cv2.cvtColor(undistorted_img, cv2.COLOR_BGR2GRAY)
+                ret, corners = cv2.findChessboardCornersSB(
+                    gray, map_grid, flags=cv2.CALIB_CB_EXHAUSTIVE + cv2.CALIB_CB_ACCURACY
+                )
+                if ret:
+                    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+                    corners_refined = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+
+                    # 3. Generate object points in 2D for homography
+                    objp_3D = generate_object_points(
+                        map_grid, self.mapping_square_size_var.get(), flip_origin=flip
+                    )
+                    objp_2D = objp_3D[:, :2].astype("float32")
+                    imgpts_2D = corners_refined.reshape(-1, 2).astype("float32")
+
+                    # 4. Compute homography
+                    H, _ = cv2.findHomography(imgpts_2D, objp_2D, 0)
+                    if H is None:
+                        print("Homography computation failed in single-image calibration.")
+                else:
+                    print("Mapping chessboard not found; homography not computed.")
+
+            # --- Save everything including homography ---
             cal_data = {
                 'camera_matrix': cam_mtx,
                 'dist_coeffs': dist_coeffs,
                 'new_camera_mtx': new_cam_mtx,
-                'flip_mapping_origin': flip
+                'flip_mapping_origin': flip,
+                'homography': H  # could be None if detection fails
             }
             os.makedirs('data', exist_ok=True)
             with open('data/calibration_data_single.pkl', 'wb') as f:
                 pickle.dump(cal_data, f)
+            print("Single-image calibration + homography saved to data/calibration_data_single.pkl.")
 
-        messagebox.showinfo("Calibration Complete", "Single-image calibration complete.")
-        print(f"Calibration saved as data/calibration_data_single.pkl")
-
+        # If user wants to visualize, show undistorted w/ grid overlay
         if visualize:
             self.feed_running = False
-            # Get mapping grid parameters from the GUI variables
             mapping_grid = (self.mapping_grid_cols_var.get(), self.mapping_grid_rows_var.get())
             mapping_square = self.mapping_square_size_var.get()
             cal_img = get_calibrated_image(
@@ -439,56 +470,87 @@ class CalibrationGUI(tk.Tk):
                 self.video_label.imgtk = imgtk
                 self.video_label.configure(image=imgtk)
             else:
-                messagebox.showwarning("Warning", "Chessboard not found in coordinate frame image for visualization.")
+                messagebox.showwarning(
+                    "Warning", "Chessboard not found in coordinate frame image for visualization."
+                )
 
+        messagebox.showinfo("Calibration Complete", "Single-image calibration complete.")
 
     def run_multi_image_calibration(self):
         """
-        Run multi-image calibration using images in the calibration directory,
-        then optionally visualize using the coordinate frame image.
+        Multi-image calibration + compute homography (using coordinate frame image).
         """
         grid_size = (self.calib_grid_cols_var.get(), self.calib_grid_rows_var.get())
         square_size = self.calib_square_size_var.get()
         flip = self.flip_mapping_var.get()
         visualize = self.visualize_var.get()
 
-        pattern = os.path.join(self.calibration_dir, "calib_*.jpg")
-        files = sorted(glob.glob(pattern))
-        if not files:
-            messagebox.showerror("Error", "No calibration images found. Please capture some first.")
-            return
-
+        # Intrinsic calibration from multiple images
         cam_mtx, dist_coeffs, new_cam_mtx = calibrate_camera(
             self.calibration_dir, grid_size, square_size, flip_origin=flip, visualize=True
         )
-
         if cam_mtx is None:
-            messagebox.showerror("Calibration Failed",
-                                "No valid chessboard corners found or calibration error. Check console for details.")
+            messagebox.showerror(
+                "Calibration Failed",
+                "No valid chessboard corners found or calibration error."
+            )
             return
 
+        # --- Compute Homography if user wants to save data ---
+        H = None
         if self.save_calib_var.get():
+            coord_img = cv2.imread(self.coord_frame_path)
+            if coord_img is not None:
+                undistorted_img = cv2.undistort(coord_img, cam_mtx, dist_coeffs, None, new_cam_mtx)
+
+                map_grid = (self.mapping_grid_cols_var.get(), self.mapping_grid_rows_var.get())
+                gray = cv2.cvtColor(undistorted_img, cv2.COLOR_BGR2GRAY)
+                ret, corners = cv2.findChessboardCornersSB(
+                    gray, map_grid, flags=cv2.CALIB_CB_EXHAUSTIVE + cv2.CALIB_CB_ACCURACY
+                )
+                if ret:
+                    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+                    corners_refined = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+
+                    objp_3D = generate_object_points(
+                        map_grid, self.mapping_square_size_var.get(), flip_origin=flip
+                    )
+                    objp_2D = objp_3D[:, :2].astype("float32")
+                    imgpts_2D = corners_refined.reshape(-1, 2).astype("float32")
+
+                    H, _ = cv2.findHomography(imgpts_2D, objp_2D, 0)
+                    if H is None:
+                        print("Homography computation failed in multi-image calibration.")
+                else:
+                    print("Mapping chessboard not found; homography not computed.")
+            else:
+                print("No coordinate frame image loaded; cannot compute homography.")
+
+            # Save everything
             cal_data = {
                 'camera_matrix': cam_mtx,
                 'dist_coeffs': dist_coeffs,
                 'new_camera_mtx': new_cam_mtx,
-                'flip_mapping_origin': flip
+                'flip_mapping_origin': flip,
+                'homography': H
             }
             os.makedirs('data', exist_ok=True)
             with open('data/calibration_data_multi.pkl', 'wb') as f:
                 pickle.dump(cal_data, f)
+            print("Multi-image calibration + homography saved to data/calibration_data_multi.pkl.")
 
-        messagebox.showinfo("Calibration Complete",
-                            "Multi-image calibration completed successfully.\nCheck console for details.")
-        print(f"Calibration saved as data/calibration_data_multi.pkl")
-
+        # Visualization
+        messagebox.showinfo(
+            "Calibration Complete",
+            "Multi-image calibration completed successfully. Check console for details."
+        )
         if visualize:
             self.feed_running = False
             default_coord_path = os.path.join(self.calibration_dir, "coord_frame_00.jpg")
             if not os.path.exists(default_coord_path):
-                messagebox.showerror("Error", "No coordinate frame image found. Please capture one first.")
+                messagebox.showerror("Error", "No coordinate frame image found.")
                 return
-            # Get mapping grid parameters from the GUI variables
+
             mapping_grid = (self.mapping_grid_cols_var.get(), self.mapping_grid_rows_var.get())
             mapping_square = self.mapping_square_size_var.get()
             cal_img = get_calibrated_image(
@@ -503,31 +565,27 @@ class CalibrationGUI(tk.Tk):
                 self.video_label.imgtk = imgtk
                 self.video_label.configure(image=imgtk)
             else:
-                messagebox.showwarning("Warning", "Chessboard not found in coordinate frame image for visualization.")
-
+                messagebox.showwarning(
+                    "Warning",
+                    "Chessboard not found in coordinate frame image for visualization."
+                )
 
     # ------------------------------------------------------------
     # Folder & Image Management
     # ------------------------------------------------------------
     def refresh_image_list(self):
         self.image_listbox.delete(0, tk.END)
-        
-        # Calibration images
         calib_pattern = os.path.join(self.calibration_dir, "calib_*.jpg")
         calib_files = sorted(glob.glob(calib_pattern))
         for f in calib_files:
             self.image_listbox.insert(tk.END, os.path.basename(f))
-        
-        # Coordinate frame images
+
         coord_pattern = os.path.join(self.calibration_dir, "coord_frame_*.jpg")
         coord_files = sorted(glob.glob(coord_pattern))
         for f in coord_files:
             self.image_listbox.insert(tk.END, os.path.basename(f))
 
     def open_selected_image(self):
-        """
-        Open the selected calibration image and display it in the live feed area (stopping camera feed).
-        """
         selection = self.image_listbox.curselection()
         if not selection:
             messagebox.showwarning("Warning", "No image selected.")
@@ -551,7 +609,6 @@ class CalibrationGUI(tk.Tk):
         self.video_label.configure(image=imgtk)
 
     def delete_selected_image(self):
-        """Delete the selected calibration image from the folder after confirmation."""
         selection = self.image_listbox.curselection()
         if not selection:
             messagebox.showwarning("Warning", "No image selected.")
@@ -567,18 +624,12 @@ class CalibrationGUI(tk.Tk):
                 messagebox.showerror("Error", f"Failed to delete image: {e}")
 
     def make_main_coord_image(self):
-        """
-        Make the currently selected coordinate frame image the main one by swapping its filename
-        with "coord_frame_00.jpg". Only coordinate frame images (i.e., those with filenames
-        starting with 'coord_frame_') are allowed.
-        """
         selection = self.image_listbox.curselection()
         if not selection:
             messagebox.showwarning("Warning", "No image selected.")
             return
 
         filename = self.image_listbox.get(selection[0])
-        # Ensure the selected image is a coordinate frame image
         if not filename.startswith("coord_frame_"):
             messagebox.showwarning("Warning", "Selected image is not a coordinate frame image.")
             return
@@ -593,12 +644,9 @@ class CalibrationGUI(tk.Tk):
 
         try:
             if os.path.exists(main_path):
-                # Rename the current main to a temporary file
                 os.rename(main_path, temp_path)
-            # Rename the selected image to become the main image
             os.rename(selected_path, main_path)
             if os.path.exists(temp_path):
-                # Rename the temporary file back to the selected image's original filename
                 os.rename(temp_path, selected_path)
             messagebox.showinfo("Success", f"'{filename}' is now the main coordinate frame image.")
         except Exception as e:
