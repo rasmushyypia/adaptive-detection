@@ -4,7 +4,7 @@ This repository provides a comprehensive adaptive detection system pipeline cont
 
 ## Table of Contents
 - [Installation](#installation)
-- [Step 1: Capture Calibration Image](#step-1-capture-images)
+- [Step 1: Camera Calibration](#step-1-camera-calibration)
 - [Step 2: Calibrate the Camera](#step-2-calibrate-the-camera)
 - [Step 3: Optimize Gripping Points](#step-3-optimize-gripping-points)
 - [Step 4: Object Detection](#step-4-object-detection)
@@ -12,27 +12,25 @@ This repository provides a comprehensive adaptive detection system pipeline cont
 
 ## Installation
 
-To get started, clone this repository and install the required dependencies:
+To get started, clone the repository and set up the conda environment with all necessary dependencies using the `environment.yml` file:
 
 ```
-bash
 git clone https://github.com/rasmushyypia/adaptive-detection.git
 cd adaptive-detection
-conda create --name adaptive-detection python=3.8
+conda env create -f environment.yml
 conda activate adaptive-detection
-pip install -r requirements.txt
 ```
 
-## Step 1: Capture Images
-This step involves capturing calibration and general images using round-cornered Radon checkerboards to ensure accurate camera calibration and coordinate frame definition.
-This project utilized two different sized checkerboards, each serving a specific purpose in the calibration process. Both the **SVG** and **JPG** files for these checkerboards
-are located in the `adaptive-detection/data/calibration_boards/` directory.
+## Step 1: Camera Calibration
+This step involves using `calibration_gui.py` to capture checkerboard images, calibrate the camera, and establish a coordinate frame on the table. By following the instructions, you will obtain both the camera's intrinsic parameters (e.g., focal length, distortion coefficients) and coordinate frame mapping for subsequent operations. 
 
-   **Medium Checkerboard** (`checkerboard_radon_medium.jpg`) is utilized for capturing the **20 calibration images** required for accurate camera calibration.
-   
-   **Large Checkerboard** (`checkerboard_radon_large.jpg`) is utilized for capturing the **coordinate_frame_image.jpg**, used in defining the coordinate frame on the table.
+### 1. Prepare the Checkerboards
+Two **round-cornered Radon checkerboards are used:**
+- **Small Checkerboard** (`checkerboard_radon_small.jpg`): is used for capturing ~20 images from various angles to accurately determine camera intrinsics.
+- **Large Checkerboard** (`checkerboard_radon_large.jpg`): is used for capturing at least one image to define the coordinate frame on the table.
 
-<img src="/data/calibration_boards/checkerboard_radon_medium.jpg" alt="Calibration Image" width="500">
+SVG files for the checkerboards used in this demo are located in the `adaptive-detection/media/calibration_boards`
+<img src="/media/calibration_boards/checkerboard_radon_small.png" alt="Calibration Image" width="500">
 
 #### 1. Verify that the checkerboard used for main camera calibration matches the grid size specified in the script (default is 10x7).
 
