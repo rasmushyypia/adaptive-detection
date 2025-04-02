@@ -31,7 +31,7 @@ Two **round-cornered Radon checkerboards are used:**
 - **Large Checkerboard** (`checkerboard_radon_large.jpg`): Used to capture image for defining the coordinate frame on the table.
 
 SVG files for the checkerboards used in this demo are located in the `adaptive-detection/media/calibration_boards`
-<img src="/media/checkerboard_radon_small.png" alt="Calibration Image" width="500">
+<img src="/media/checkerboard_radon_small.png" alt="small calibration board" width="500">
 
 ### 2. Launch the Calibration GUI
 Run the following command from the project's **source directory**, run:
@@ -39,7 +39,7 @@ Run the following command from the project's **source directory**, run:
 python calibration_gui.py
 ```
 A window will appear, showing a live camera feed on the right and parameter settings on the left.
-<img src="/media/checkerboard_radon_small.png" alt="Calibration Image" width="500">
+<img src="/media/calibration_gui_image.png" alt="calibration gui" width="500">
 
 #### 1. Verify that the checkerboard used for main camera calibration matches the grid size specified in the script (default is 10x7).
 
