@@ -5,7 +5,7 @@ This repository provides a comprehensive adaptive detection system pipeline cont
 ## Table of Contents
 - [Installation](#installation)
 - [Step 1: Camera Calibration](#step-1-camera-calibration)
-- [Step 2: Calibrate the Camera](#step-2-calibrate-the-camera)
+- [Step 2: Optimize Gripping Points](#step-2-optimize-gripping-points)
 - [Step 3: Optimize Gripping Points](#step-3-optimize-gripping-points)
 - [Step 4: Object Detection](#step-4-object-detection)
 
@@ -85,8 +85,9 @@ In the **Calibration & Mapping Parameters** section, set the following according
 - Computes intrinsic parameters using **all** captured calibration images (e.g., `calib_00.jpg` to `calib_19.jpg`.
 - Uses the coordinate frame image to define the table's origin and axis orientation.
 
+<img src="/media/calibration_gui_image2.png" alt="calibration gui2" width="600">
 
-
+## Step 2: Optimize Gripping Points
 
 
 
