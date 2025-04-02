@@ -31,7 +31,7 @@ Two **round-cornered Radon checkerboards are used:**
 - **Large Checkerboard** (`checkerboard_radon_large.jpg`): Used to capture image for defining the coordinate frame on the table.
 
 SVG files for the checkerboards used in this demo are located in the `adaptive-detection/media/calibration_boards`
-<img src="/media/checkerboard_radon_small.png" alt="small calibration board" width="500">
+<img src="/media/checkerboard_radon_small.png" alt="small calibration board" width="600">
 
 ### 2. Launch the Calibration GUI
 Run the following command from the project's **source directory**, run:
@@ -39,44 +39,55 @@ Run the following command from the project's **source directory**, run:
 python calibration_gui.py
 ```
 A window will appear, showing a live camera feed on the right and parameter settings on the left.
-<img src="/media/calibration_gui_image.png" alt="calibration gui" width="500">
+<img src="/media/calibration_gui_image.png" alt="calibration gui" width="600">
 
-#### 1. Verify that the checkerboard used for main camera calibration matches the grid size specified in the script (default is 10x7).
+### 3. Capture Calibration Images
+**1. Start the Camera**: In the **Capture Image Parameters** section, set the camera index, capture resolution, and chessboard grid dimensions to match your setup, then click **Start Camera**.
+**2. Verify Checkerboard Detection**: Check that the live feed in the right panel can detect the checkerboard corners. The checkerboard grid size settings must exactly match the checkerboard pattern being used.
+**3. Capture Calibration Images**: Click **Capture Calibration Image** (or press **X**) to capture multiple images. Aim for **~20 images** from various angles to improve calibration accuracy.
+- All calibration images (`calib_XX.jpg`) are saved automatically to `data/calibration_images`.
+- You can open or delete these images using the **Calibration Image Folder** panel at the bottom left.
 
-#### 2. run `capture_images.py`
+### 3. Capture Calibration Images
 
-#### 3. Follow on-screen instructions:
- - Press `SPACEBAR` to capture calibration images when the checkerboard is detected.
-    - Capture a total of **20 calibration** images for accurate calibration.
- - Align checkerboard with the table and press `c` to capture a `coordinate_frame_image.jpg`
- - Press `x` to capture a `test_image.jpg` of a rectangular object positioned at a known location relative to the table.
-    - This is optional, but can be used in the next step to verify the accuracy of the calibration.
+1. **Start the Camera**  
+   In the **Capture Image Parameters** section, set the camera index, capture resolution, and chessboard grid dimensions to match your setup, then click **Start Camera**.
 
-#### 4. Additional Information:
- - Calibration images are stored in `data/calibration_images`
- - General images are stored in `data/`.
+2. **Verify Checkerboard Detection**  
+   Check that the live feed in the right panel can detect the checkerboard corners.  
+  ⚠️ The checkerboard grid size settings must exactly match the checkerboard pattern being used.
+
+3. **Capture Calibration Images**  
+   Click **Capture Calibration Image** (or press **X**) to capture multiple images. Aim for **~20 images** from various angles to improve calibration accuracy.
+
+   - All calibration images (`calib_XX.jpg`) are saved automatically to `data/calibration_images/`.
+   - You can open or delete these images using the **Calibration Image Folder** panel at the bottom left.
 
 
-## Step 2: Calibrate the Camera
-This step involves computing the camera's intrinsic parameters and distortion coefficients using the previosly captured calibration image. Proper calibration allows for undistorting images and accurately mapping image points to real-world coordinates.
+### 4. Capture Coordinate Frame Image
+Position the larger checkerboard where you want to place the table's (0,0) origin, including the directions of the x- and y-axes. Then press **C** to save the coordinate frame image (`coord_frame_XX.jpg`) to `data/calibration_images`.
 
-#### 1. Configure calibration parameters: 
-Open the `camera_calibration.py` script and locate the **Calibration Parameters** section within the `main()` function. Ensure the following parameters are correctly configured:
-  - **Calibration parameters** (`calib_grid_size` and `calib_square_size`) define the number of internal corners per chessboard row and column, and size of each chessboard square in millimeters respectively.
-  - **Mapping parameters** (`mapping_grid_size` and `mapping_square_size`) are similar to calibration parameters but used for defining the coordinate frame.
-    - These might differ based on your setup.
-  - **Offsets** (`offset_x` and `offset_y`) define the physical offset in millimeters from the chessboard's origin to the tables's corner.
-    - Used to move the origin to the corner of table for ease of use.
-    - To better understand how `offset_x` and `offset_y` affect the origin. The orange dashed lines in the image below indicate the offsets move the origin from the chessboard's origin to the table's edge.
+### 5. Configure Calibration and Mapping
+In the **Calibration & Mapping Parameters** section, set the following according to the checkerboards you're using:
+- **Calibration Grid / Square Size (mm)**: Specifies the checkerboard dimensions and physical square size used for **intrinsic calibration**.
+- **Mapping Grid / Square Size (mm)**: Specifies the checkerboard dimensions and physical square size used to establish the **table coordinate system**.
+- **Flip Mapping Origin**: Changes the origin from the checkerboard's top-left corner (default) to the bottom-right. Useful if your coordinate axes appear flipped after calibration
+- **Visualize Calibration**: When enabled, displays the undistorted coordinate frame image with the projected mapping grid.
+- **Save Calibration Data**: When enabled, saves the calibration result in `data/` folder.
 
-<img src="/media/offset_image.jpg" alt="offset_image" width="800">
+### 6. Run Single or Multi-Image Calibration
 
-#### 2. Run `camera_calibration.py`
-   - The script includes a `visualize` flag. When set to `True`, the script will display intermediate steps such as detected chessboard corners and annotated images to help verify the calibration process.
-   - The script will display camera matrix, distortion coefficients, and the mean reprojection error, which indicates about the calibration accuracy.
+1. **Single-Image Calibration**
+- Uses **only** the single coordinate frame for both intrinsic calibration and coordinate mapping.
+- Calibration and mapping parameters must be **identical** (e.g., same grid size and square size).
 
-#### 3. Additional Information:
-   - The calibration data, including offset information is saved to `data/calibration_data.pkl` file. 
+2. **Multi-Image Calibration**
+- Computes intrinsic parameters using **all** captured calibration images (e.g., `calib_00.jpg` to `calib_19.jpg`.
+- Uses the coordinate frame image to define the table's origin and axis orientation.
+
+
+
+
 
 
 ## Step 3: Optimize Gripping Points
