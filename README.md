@@ -119,7 +119,7 @@ When you are satisfied with the gripping configuration:
    - **gripper_distance**: The distance between the two gripping points.
    - **gripper_line_angle**: The angle of the line connecting gripping points.
 
-
+<img src="/media/gripping_point_optimizer_image.png" alt="gripping_point_image" width="600">
 
 ## Step 4: Object Detection
 Object detection is the main program in this project that utilizes data generated in earlier steps to identify and localize objects within the camera's field of view. 
