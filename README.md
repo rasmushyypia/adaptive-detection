@@ -42,13 +42,6 @@ A window will appear, showing a live camera feed on the right and parameter sett
 <img src="/media/calibration_gui_image.png" alt="calibration gui" width="600">
 
 ### 3. Capture Calibration Images
-**1. Start the Camera**: In the **Capture Image Parameters** section, set the camera index, capture resolution, and chessboard grid dimensions to match your setup, then click **Start Camera**.
-**2. Verify Checkerboard Detection**: Check that the live feed in the right panel can detect the checkerboard corners. The checkerboard grid size settings must exactly match the checkerboard pattern being used.
-**3. Capture Calibration Images**: Click **Capture Calibration Image** (or press **X**) to capture multiple images. Aim for **~20 images** from various angles to improve calibration accuracy.
-- All calibration images (`calib_XX.jpg`) are saved automatically to `data/calibration_images`.
-- You can open or delete these images using the **Calibration Image Folder** panel at the bottom left.
-
-### 3. Capture Calibration Images
 
 1. **Start the Camera**  
    In the **Capture Image Parameters** section, set the camera index, capture resolution, and chessboard grid dimensions to match your setup, then click **Start Camera**.
@@ -60,9 +53,8 @@ A window will appear, showing a live camera feed on the right and parameter sett
 3. **Capture Calibration Images**  
    Click **Capture Calibration Image** (or press **X**) to capture multiple images. Aim for **~20 images** from various angles to improve calibration accuracy.
 
-   - All calibration images (`calib_XX.jpg`) are saved automatically to `data/calibration_images/`.
+   - All calibration images (180°calib_XX.jpg`) are saved automatically to `data/calibration_images/`.
    - You can open or delete these images using the **Calibration Image Folder** panel at the bottom left.
-
 
 ### 4. Capture Coordinate Frame Image
 Position the larger checkerboard where you want to place the table's (0,0) origin, including the directions of the x- and y-axes. Then press **C** to save the coordinate frame image (`coord_frame_XX.jpg`) to `data/calibration_images`.
@@ -73,7 +65,7 @@ In the **Calibration & Mapping Parameters** section, set the following according
 - **Mapping Grid / Square Size (mm)**: Specifies the checkerboard dimensions and physical square size used to establish the **table coordinate system**.
 - **Flip Mapping Origin**: Changes the origin from the checkerboard's top-left corner (default) to the bottom-right. Useful if your coordinate axes appear flipped after calibration
 - **Visualize Calibration**: When enabled, displays the undistorted coordinate frame image with the projected mapping grid.
-- **Save Calibration Data**: When enabled, saves the calibration result in `data/` folder.
+- **Save Calibration Data**: When enabled, saves the calibration result in `data/` folder as 180°gripping_data.pkl`.
 
 ### 6. Run Single or Multi-Image Calibration
 
@@ -82,39 +74,51 @@ In the **Calibration & Mapping Parameters** section, set the following according
 - Calibration and mapping parameters must be **identical** (e.g., same grid size and square size).
 
 2. **Multi-Image Calibration**
-- Computes intrinsic parameters using **all** captured calibration images (e.g., `calib_00.jpg` to `calib_19.jpg`.
+- Computes intrinsic parameters using **all** captured calibration images (e.g., `calib_00.jpg` to `calib_19.jpg`).
 - Uses the coordinate frame image to define the table's origin and axis orientation.
 
 <img src="/media/calibration_gui_image2.png" alt="calibration gui2" width="600">
 
 ## Step 2: Optimize Gripping Points
+This step `gripping_point_optimizer.py` to determine optimal two-finger gripper placement around an object defined in a DXF file. It automatically computes an inner (inset) boundary to avoid collisions with the object edges or holes, then allows manual fine-tuning or automatic optimization for gripper positions.
 
+### 1. **Launch the gripping point GUI**  
+From the project's **source directory**, run:
+```
+python gripping_point_optimizer.py
+```
 
+### 2. **Open a DXF File**
+1. Click **Open DXF** and select a DXF containing a closed polygonal shape.
+2. The script extracts:
+   - **Outer Boundary** (shown in blue),
+   - **Holes** (if present, shown in red)
+   - **Inner Contour** (green dashed line), an inset boundary ensuring safe clearance for the gripper
+   - 📁 Example DXF files used in this project can be found in the `data/dxf_shapes/` folder.
 
-## Step 3: Optimize Gripping Points
-This step involves selecting and refining the optimal points on object's contour where the grippers will make contact.
+### 3. **Adjust the Grippers Manually**
+1. **Step Size Slider**: Controls how far each gripper moves on a single click.
 
-#### 1. Load and prepare contour data
-  - The process begins by loading the contour data of the object to be gripped. This can be done either by:
-    - Importing the object's outline from a **DXF file**.
-    - Selecting from a set of **predefined shapes** for testing purposes.
-     
-#### 2. Calculate centroid and internal angles
-  - Calculate the geometric center of the contour and center the shape around origin.
-  - Computes the internal angles at each vertex of the contour to identify significant points for selecting initial gripping points.
-  
-#### 3. GUI for adjusting and optimizing the gripping points.
-  - Displays the object's contour, initial gripping points, and safe quadrilateral areas.
-  - Includes sliders and buttons to select step size and move gripping points clockwise or counterclockwise along the contour.
-  - Utilizes **Sequential Least Squares Programming** for optimization.
-     - Optimizes either `safe quadrilateral area` or `max offset` from outer contour.
-  - Currently program has two versions `GrippingPointSymmetric.py` and `GrippingPointNonSymmetric.py` visualized in images below.
+2. **G1/G2 CW or CCW**: Moves the respective gripper along the inner contour in a clockwise or counterclockwise direction.
 
-<img src="/media/symmetric_gui.png" alt="offset_image" width="600">
-<img src="/media/non_symmetric_gui.png" alt="offset_image" width="600">
+3. **Reset**: Returns both grippers to their original, default positions.
 
-#### 4. Additional Information:     
- - The gripping points and polygon coordinates are saved to a **CSV file** (`data/gripping_data.csv`)
+### 4. Optimization
+Click **Optimize Grippers** to run a **Differential Evolution** algorithm that searches for the most suitable symmetric gripper positions along the inner contour.
+The optimization:
+- Places one gripper point along the inner contour, and places the second gripper at the point **halfway around the contour** from the first.
+- **Minimizes the maximum distance** between the gripper region and the object's outer boundary, encouraging a central and stable grip.
+- Applies a **penalty** if either gripper overlaps with a hole, steering the solution away from unsafe regions.
+
+### 5. Save Data
+When you are satisfied with the gripping configuration:
+1. Click **Save Data** to store the polygon geometry and gripper points in `data/gripping_data.pkl`.
+2. This file includes:
+   - **final_poly**: The complete Shapely polygon (outer shape + holes)
+   - **gripping_points**: A NumPy array of the final (x,y) gripper coordinates.
+   - **gripper_distance**: The distance between the two gripping points.
+   - **gripper_line_angle**: The angle of the line connecting gripping points.
+
 
 
 ## Step 4: Object Detection
