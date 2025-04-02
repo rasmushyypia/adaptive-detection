@@ -16,8 +16,9 @@ To get started, clone the repository and set up the conda environment with all n
 
 ```
 git clone https://github.com/rasmushyypia/adaptive-detection.git
-cd adaptive-detection
+cd adaptive-detection/
 conda env create -f environment.yml
+cd src/
 conda activate adaptive-detection
 ```
 
@@ -26,11 +27,19 @@ This step involves using `calibration_gui.py` to capture checkerboard images, ca
 
 ### 1. Prepare the Checkerboards
 Two **round-cornered Radon checkerboards are used:**
-- **Small Checkerboard** (`checkerboard_radon_small.jpg`): is used for capturing ~20 images from various angles to accurately determine camera intrinsics.
-- **Large Checkerboard** (`checkerboard_radon_large.jpg`): is used for capturing at least one image to define the coordinate frame on the table.
+- **Small Checkerboard** (`checkerboard_radon_small.jpg`): Used to capture ~20 images from varying angles to compute the camera's intrinsics.
+- **Large Checkerboard** (`checkerboard_radon_large.jpg`): Used to capture image for defining the coordinate frame on the table.
 
 SVG files for the checkerboards used in this demo are located in the `adaptive-detection/media/calibration_boards`
-<img src="/media/calibration_boards/checkerboard_radon_small.png" alt="Calibration Image" width="500">
+<img src="/media/checkerboard_radon_small.png" alt="Calibration Image" width="500">
+
+### 2. Launch the Calibration GUI
+Run the following command from the project's **source directory**, run:
+```
+python calibration_gui.py
+```
+A window will appear, showing a live camera feed on the right and parameter settings on the left.
+<img src="/media/checkerboard_radon_small.png" alt="Calibration Image" width="500">
 
 #### 1. Verify that the checkerboard used for main camera calibration matches the grid size specified in the script (default is 10x7).
 
