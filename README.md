@@ -18,7 +18,6 @@ This repository provides a complete pipeline for adaptive gripping and object de
 ```
 git clone https://github.com/rasmushyypia/adaptive-detection.git
 cd adaptive-detection/
-
 ```
 
 
@@ -28,7 +27,6 @@ cd adaptive-detection/
 conda env create -f environment.yml
 cd src/
 conda activate adaptive-detection
-
 ```
 
 
