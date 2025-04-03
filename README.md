@@ -79,7 +79,7 @@ python calibration_gui.py
 
 2. **Verify Checkerboard Detection**  
    Ensure that the live feed visualizes checkerboard corners clearly.  
-  ⚠️ _Important: The checkerboard grid size setting must exactly match the pattern on your checkerboard._
+  ⚠️ _The checkerboard grid size setting must exactly match the pattern on your checkerboard._
 
 3. **Capture Images**  
    Click **Capture Calibration Image** (or press **X**) to take images. Aim for **~20 images** from various angles to improve calibration accuracy. All images (e.g., `calib_XX`) are by default saved to `data/calibration_images/`. Images can be viewed or deleted via the **Calibration Image Folder** panel in the GUI.
@@ -206,7 +206,8 @@ python detection_server.py
 3. The server launches two threads:
    - **Camera Thread**: Displays a live OpenCV window with any detection overlays.
    - **Socket Server Thread**: Listens for `"get_vision_data"` requests.
-4. Integrate with your robot controller by sending TCP commands. This setup is designed to work with the URCap provided in this project. Ensure that the IP address used to run detection server matches the robot-side settings and that both devices are on the same network.
+4. Integrate with your robot controller by sending TCP commands. This setup is designed to work with the URCap provided in this project.
+  ⚠️ _Ensure the detection server's IP matches the robot-side settings and that both devices are on the same network._
 
 <div style="position: relative; display: inline-block;">
   <img src="/media/detection_result.png" alt="detection_result" width="700">
