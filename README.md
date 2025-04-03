@@ -6,8 +6,8 @@ This repository provides a comprehensive adaptive detection system pipeline cont
 - [Installation](#installation)
 - [Step 1: Camera Calibration](#step-1-camera-calibration)
 - [Step 2: Optimize Gripping Points](#step-2-optimize-gripping-points)
-- [Step 3: Optimize Gripping Points](#step-3-optimize-gripping-points)
-- [Step 4: Object Detection](#step-4-object-detection)
+- [Step 3: Object Detection](#step-3-object-detection)
+
 
 
 ## Installation
@@ -31,7 +31,7 @@ Two **round-cornered Radon checkerboards are used:**
 - **Large Checkerboard** (`checkerboard_radon_large.jpg`): Used to capture image for defining the coordinate frame on the table.
 
 SVG files for the checkerboards used in this demo are located in the `adaptive-detection/media/calibration_boards`
-<img src="/media/checkerboard_radon_small.png" alt="small calibration board" width="600">
+<img src="/media/checkerboard_radon_small.png" alt="small calibration board" width="700">
 
 ### 2. Launch the Calibration GUI
 Run the following command from the project's **source directory**, run:
@@ -39,7 +39,7 @@ Run the following command from the project's **source directory**, run:
 python calibration_gui.py
 ```
 A window will appear, showing a live camera feed on the right and parameter settings on the left.
-<img src="/media/calibration_gui_image.png" alt="calibration gui" width="600">
+<img src="/media/calibration_gui_image.png" alt="calibration gui" width="700">
 
 ### 3. Capture Calibration Images
 
@@ -77,7 +77,13 @@ In the **Calibration & Mapping Parameters** section, set the following according
 - Computes intrinsic parameters using **all** captured calibration images (e.g., `calib_00.jpg` to `calib_19.jpg`).
 - Uses the coordinate frame image to define the table's origin and axis orientation.
 
-<img src="/media/calibration_gui_image2.png" alt="calibration gui2" width="600">
+<img src="/media/calibration_gui_image2.png" alt="calibration gui2" width="700">
+
+
+
+
+
+
 
 ## Step 2: Optimize Gripping Points
 This step `gripping_point_optimizer.py` to determine optimal two-finger gripper placement around an object defined in a DXF file. It automatically computes an inner (inset) boundary to avoid collisions with the object edges or holes, then allows manual fine-tuning or automatic optimization for gripper positions.
@@ -119,31 +125,49 @@ When you are satisfied with the gripping configuration:
    - **gripper_distance**: The distance between the two gripping points.
    - **gripper_line_angle**: The angle of the line connecting gripping points.
 
-<img src="/media/gripping_point_optimizer_image.png" alt="gripping_point_image" width="600">
+<img src="/media/gripping_point_optimizer_image.png" alt="gripping_point_image" width="700">
 
-## Step 4: Object Detection
-Object detection is the main program in this project that utilizes data generated in earlier steps to identify and localize objects within the camera's field of view. 
 
-#### 1. Load calibration and gripping data
-  - The object detection utilizes `calibration_data.pkl` and `gripping_data.csv` generated in earlier scripts.
 
-#### 2. Configure detection parameters
-  - `THRESHOLD`: similarity threshold for contour matching
-  - `AREA_TOLERANCE`: tolerance for area difference between detected and reference contours.
-  - `USE_STATIC_IMAGE`: Set to **True** to run detection on a static image, or **False** to use live webcam feed.
-  - furthermore `optimize_angle' function contains parameters relevant to **Differential Evolution** used in optimizing the detected contour angle.
 
-#### 3. Run `detection_modularized.py`
 
-### How it works:
-  - **Image Preprocessing**: Converts images to grayscale, applies Gaussian blur to reduce noise, and utilizes Canny edge detection to highlight object boundaries.
-  - **Contour Detection and Matching**: Detects contours from the preprocessed image and compares them with the reference polygon using OpenCV's `matchShapes` method. Detected contours are filtered based on similarity score and area difference to the reference image.
-  - **Centroid Calculation**: Calculates centroid of the detected contour to provide precise location (x, y) on the table.
-  - **Angle Optimization**: Utilizes Differential Evolution algorithm to calculate rotation angle and small positional shifts by maximizing the Intersection over Union (IoU) between reference and detected contours.
-  - **Data to Robot**: The calculated coordinates (x, y) and rotation angle (R) are provided to the robot to move it to the gripping position.
-  - **Gripper Positioning**: The gripper jig, mounted on the 6-axis robot, utilizes the gripping points calculated in GrippingPointSymmetric.py. Servos within the jig adjust each individual gripper's position based on these coordinates.
 
-#### 4. Additional information
-  - The script calculates time that it took to optimize, which can be used to find good parameter values.
 
-<img src="/media/object_detection_result.png" alt="detection_result" width="1000">
+
+## Step 3: Object Detection
+
+In this step, you will use the camera calibration (from **Step 1**) and the part geometry/gripper configuration (from **Step 2**) to detect the object in real time. You can do this in one of two ways:
+1. **Server-Based Approach** using `detection_server.py` (used when communicating with robot), or
+2. **Standalone Approach** using `detection_standalone.py` (useful for testing and debugging).
+
+Both scripts rely on the same core detection pipeline—edge extraction, contour analysis, shape matching, and IoU-based optimization—to locate the object’s position and orientation in the camera feed.
+
+### 1. Server-Based Detection (`detection_server.py`)
+This script continuously processes the live camera feed and exposes a socket server on port `40411`. When a client (e.g., a robot controller) sends the text command `"get_vision_data"`, the server:
+1. Grabs the **most recent** camera frame.
+2. Runs the detection pipeline to find the objects (x,y) coordinates and orientation.
+3. Returns a string formatted like `(distance_in_mm, x_coordinate, y_coordinate, r_angle)`.
+
+#### How to use:
+1. Make sure your `calibration_data.pkl` and `gripping_data.pkl` (from Steps 1 and 2) are in the `data/` directory.
+2. From the `src/` folder, run:
+```
+python detection_server.py
+```
+3. The server launches two threads:
+   - **Camera Thread**: Displays a live OpenCV window with any detection overlays.
+   - **Socket Server Thread**: Listens for `"get_vision_data"` requests.
+4. Integrate with your robot or external client code by sending commands over TCP to retrieve real-time detection results.
+```
+# Example netcat (nc) usage from another terminal:
+# (Press Ctrl+C to quit)
+nc 127.0.0.1 40411
+get_vision_data
+( 270.00, 150.25, 200.40, 10.00 )  <-- Example response
+```
+<img src="/media/detection_result.png" alt="detection_result" width="700">
+
+### 2. Standalone Detection (`detection_standalone.py`)
+This Script can be used for testing the detection process without external client. It can be configured to run on **static images** or **live camera** by modifying the `USE_STATIC_IMAGE` flag inside the script. 
+
+
