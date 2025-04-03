@@ -1,19 +1,19 @@
-# Adaptive Gripping and Detection System
+# Introduction
 This repository provides a complete pipeline for adaptive gripping and object detection. It combines three key stages: **camera calibration**, **gripping point optimization**, and **object detection**. The system is designed for a **custom variable gripper** and can be integrated with **Universal Robots (UR5)** using a dedicated URCap plugin (`/media/VariableGripper-2.0.urcap`). Additionally, a standalone detection version is available, compatible with any camera and laptop/PC capable of running Python and OpenCV.
 
 | <img src="/media/detection.png" width="300"/> | <img src="/media/overview.jpg" width="300"/> | <img src="/media/VariableGripper.gif" width="300"/> |
 | --- | --- | --- |
 
 
-## Table of Contents
-- [Installation](#installation)
-- [Camera Calibration](#camera-calibration)
-- [Gripping Point Optimization](#gripping-point-optimization)
-- [Object Detection](#object-detection)
+## 📋Table of Contents
+- [Install & Build 🛠️](#install-and-build)
+- [Camera Calibration 📷](#camera-calibration)
+- [Gripping Point Optimization 🎯](#gripping-point-optimization)
+- [Object Detection 🔍](#object-detection)
 
 
+## <a id="install-and-build"></a>🛠️ Install & Build 
 
-## Installation 
 ### 1. Clone the Repository
 ```
 git clone https://github.com/rasmushyypia/adaptive-detection.git
@@ -32,8 +32,7 @@ conda activate adaptive-detection
 ```
 
 
-
-## Camera Calibration
+## <a id="camera-calibration"></a>📷 Camera Calibration 
 This step uses `calibration_gui.py` to capture checkerboard images, calibrate the camera, and establish the table's coordinate frame. After calibration, you'll have the camera's intrinsic parameters (e.g., focal lenght, distortion coefficients) and mapping for later operations.
  
 
@@ -125,7 +124,7 @@ In the **Calibration & Mapping Parameters** section, set these options according
 
 
 
-## Gripping Point Optimization
+## <a id="gripping-point-optimization"></a>🎯 Gripping Point Optimization 
 This step runs `gripping_point_optimizer.py` to find a safe two-finger gripper placement for an object from a DXF file. It calculates a safe inner boundary to avoid hitting the object's edges or holes and lets you adjust the gripper positions by hand or automatically.
 
 
@@ -187,7 +186,7 @@ Once you are satisfied with the gripping configuration:
 
 
 
-## Object Detection
+## <a id="object-detection"></a>🔎 Object Detection
 
 In this stage, you combine the camera calibration with part geometry and gripper configuration to detect objects in real time. The detection pipeline involves edge extraction, contour analysis, shape matching, and IoU-based optimization to determine the object's position and orientation in the camera feed.
 
