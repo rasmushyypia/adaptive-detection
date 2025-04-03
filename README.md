@@ -1,7 +1,7 @@
 # Introduction
 This repository provides a complete pipeline for adaptive gripping and object detection. It combines three key stages: **camera calibration**, **gripping point optimization**, and **object detection**. The system is designed for a **custom variable gripper** and can be integrated with **Universal Robots (UR5)** using a dedicated URCap plugin (`/media/VariableGripper-2.0.urcap`). Additionally, a standalone detection version is available, compatible with any camera and laptop/PC capable of running Python and OpenCV.
 
-| <img src="/media/detection.png" width="300"/> | <img src="/media/overview.jpg" width="300"/> | <img src="/media/VariableGripper.gif" width="300"/> |
+| <img src="/media/detection.png" width="300"/> | <img src="/media/overview.jpg" width="300"/> | <img src="/media/variable_gripper.gif" width="300"/> |
 | --- | --- | --- |
 
 
