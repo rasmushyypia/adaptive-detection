@@ -10,6 +10,7 @@ This repository provides a complete pipeline for adaptive gripping and object de
 - [Camera Calibration 📷](#camera-calibration)
 - [Gripping Point Optimization 🎯](#gripping-point-optimization)
 - [Object Detection 🔍](#object-detection)
+- [License ⚖️](#license)
 
 
 ## <a id="install-and-build"></a>🛠️ Install & Build 
@@ -221,9 +222,10 @@ python detection_server.py
 </div>
 
 
-### 2. Standalone Detection (`detection_standalone.py`)
-This script lets you test the object detection process without needing an external client. You can configure it to use live camera feed or use previously taken test images by modifying the `USE_STATIC_IMAGE` flag within the script.
+## <a id="license"></a>⚖️ License
 
+This project is available under the **MIT license**. Feel free to edit and distribute this template as you like.
 
+See [LICENSE](LICENSE) for more information.
 
 
