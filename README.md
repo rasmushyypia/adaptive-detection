@@ -1,7 +1,7 @@
 # Introduction
 This repository provides a complete pipeline for adaptive gripping and object detection. It combines three key stages: **camera calibration**, **gripping point optimization**, and **object detection**. The system is designed for a **custom variable gripper** and can be integrated with **Universal Robots (UR5)** using a dedicated URCap plugin (`/media/VariableGripper-2.0.urcap`). Additionally, a standalone detection version is available, compatible with any camera and laptop/PC capable of running Python and OpenCV.
 
-| <img src="/media/detection.png" width="300"/> | <img src="/media/overview.jpg" width="300"/> | <img src="/media/variable_gripper.gif" width="300"/> |
+| <img src="/media/images/detection.png" width="300"/> | <img src="/media/images/overview.jpg" width="300"/> | <img src="/media/images/variable_gripper.gif" width="300"/> |
 | --- | --- | --- |
 
 
@@ -44,7 +44,7 @@ Two **round-cornered Radon checkerboards** are used:
 SVG files for the checkerboards used in this demo are located in the `adaptive-detection/media/calibration_boards`
 
 <div style="position: relative; display: inline-block;">
-  <img src="/media/checkerboard_radon_small.png" alt="small calibration board" width="700">
+  <img src="/media/images/checkerboard_radon_small.png" alt="small calibration board" width="700">
   <div style="
       position: absolute;
       top: 20px;
@@ -62,7 +62,7 @@ python calibration_gui.py
 ```
 
 <div style="position: relative; display: inline-block;">
-  <img src="/media/calibration_gui_image.png" alt="small calibration board" width="700">
+  <img src="/media/images/calibration_gui_image.png" alt="small calibration board" width="700">
   <div style="
       position: absolute;
       top: 20px;
@@ -110,7 +110,7 @@ In the **Calibration & Mapping Parameters** section, set these options according
 - Uses the coordinate frame image to define the table's origin and axis orientation.
 
 <div style="position: relative; display: inline-block;">
-  <img src="/media/calibration_gui_image2.png" alt="calibration gui2" width="700">
+  <img src="/media/images/calibration_gui_image2.png" alt="calibration gui2" width="700">
   <div style="
       position: absolute;
       top: 20px;
@@ -172,7 +172,7 @@ Once you are satisfied with the gripping configuration:
    - **gripper_line_angle**: The baseline orientation of line connecting the gripping points, needed to determine final alignment angle during real-time detection.
 
 <div style="position: relative; display: inline-block;">
-  <img src="/media/gripping_point_optimizer_image.png" alt="gripping_point_image" width="700">
+  <img src="/media/images/gripping_point_optimizer_image.png" alt="gripping_point_image" width="700">
   <div style="
       position: absolute;
       top: 20px;
@@ -210,7 +210,7 @@ python detection_server.py
   ⚠️ _Ensure the detection server's IP matches the robot-side settings and that both devices are on the same network._
 
 <div style="position: relative; display: inline-block;">
-  <img src="/media/detection_result.png" alt="detection_result" width="700">
+  <img src="/media/images/detection_result.png" alt="detection_result" width="700">
   <div style="
       position: absolute;
       top: 20px;
