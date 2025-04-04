@@ -1,5 +1,5 @@
 # Introduction
-This repository provides a complete pipeline for adaptive gripping and object detection. It combines three key stages: **camera calibration**, **gripping point optimization**, and **object detection**. The system is designed for a **custom variable gripper** and can be integrated with **Universal Robots (UR5)** using a dedicated URCap plugin (`/media/VariableGripper-2.0.urcap`). Additionally, a standalone detection version is available, compatible with any camera and laptop/PC capable of running Python and OpenCV.
+This repository provides a complete pipeline for adaptive gripping and object detection. It combines three key stages: **camera calibration**, **gripping point optimization**, and **object detection**. The system is designed for a **custom variable gripper** and can be integrated with **Universal Robots (UR5)** using a dedicated URCap plugin `/media/VariableGripper-2.0.urcap`. Additionally, a standalone detection version is available, compatible with any camera and laptop/PC capable of running Python and OpenCV.
 
 | <img src="/media/images/detection.png" width="300"/> | <img src="/media/images/overview.jpg" width="300"/> | <img src="/media/images/variable_gripper.gif" width="300"/> |
 | --- | --- | --- |
@@ -87,7 +87,7 @@ python calibration_gui.py
 
 
 ### 4. Capture Coordinate Frame Image
-Place the larger checkerboard at the desired location to define the table's (0,0) origin, including the x- and y-axis directions. Once positioned correctly, press **C** to capture and save the coordinate frame image (`coord_frame_XX.jpg`) to `data/calibration_images`.
+Place the larger checkerboard at the desired location to define the table's (0,0) origin, including the x- and y-axis directions. Once positioned correctly, press **C** to capture and save the coordinate frame image `coord_frame_XX.jpg` to `data/calibration_images`.
 
 🤖 _Note: If you plan to use the vision system with a robot, now is a good time to define a corresponding frame the robot that aligns with the camera's frame._
 
