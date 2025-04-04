@@ -221,6 +221,8 @@ python detection_server.py
   </div>
 </div>
 
+### 2. Standalone Detection (`detection_standalone.py`)
+This script lets you test the object detection process without needing an external client. You can configure it to use live camera feed or use previously taken test images by modifying the `USE_STATIC_IMAGE` flag within the script.
 
 ## <a id="license"></a>⚖️ License
 
